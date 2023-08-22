@@ -1,5 +1,5 @@
 enum COMMON {
-    PARAM_ERROR = 1, //参数错误
+    PARAM_ERROR = 9001, //参数错误
 }
 
 // 服务器错误

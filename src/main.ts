@@ -40,7 +40,6 @@ async function bootstrap() {
     const port = config.get('app.port');
 
     await app.listen(port, () => {
-        Logger.log('this is test');
         Logger.log(`service starts, port ${port}`);
     });
 }

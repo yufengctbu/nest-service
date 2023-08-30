@@ -1,16 +1,21 @@
+import { Logger } from '@nestjs/common';
 import helmet from 'helmet';
 import * as compression from 'compression';
 import { NestFactory } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
 
 import { AppModule } from '@app/app.module';
+import { LogModule } from '@app/shared/log';
 import { validationHelper } from '@app/helpers/validate.helper';
 import { ExceptionsFilter } from '@app/filters/exception.filter';
 import { RequestIdMiddleware } from '@app/middlewares/requestId.middleware';
 import { TransformInterceptor } from '@app/interceptors/transform.interceptor';
 
 async function bootstrap() {
-    const app = await NestFactory.create(AppModule);
+    const app = await NestFactory.create(AppModule, {
+        logger: LogModule.createLogger(),
+    });
+
     const config = app.get(ConfigService);
 
     // 往所有的请求中添加requestId的标识
@@ -35,7 +40,8 @@ async function bootstrap() {
     const port = config.get('app.port');
 
     await app.listen(port, () => {
-        console.log(`service starts, port ${port}`);
+        Logger.log('this is test');
+        Logger.log(`service starts, port ${port}`);
     });
 }
 

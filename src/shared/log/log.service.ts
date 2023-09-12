@@ -1,6 +1,7 @@
 import { Injectable, LoggerService } from '@nestjs/common';
 import { Logger, createLogger, transports, format } from 'winston';
-import { nestConsoleFormat } from './log.helper';
+
+import { logLevels, nestConsoleFormat } from './log.helper';
 
 @Injectable()
 export class LogService implements LoggerService {
@@ -12,11 +13,9 @@ export class LogService implements LoggerService {
 
     private initLogInstance(): Logger {
         return createLogger({
-            transports: [
-                new transports.Console({
-                    format: format.combine(format.timestamp(), nestConsoleFormat()),
-                }),
-            ],
+            levels: logLevels,
+            format: format.combine(format.simple(), format.timestamp(), format.ms(), nestConsoleFormat()),
+            transports: [new transports.Console()],
         });
     }
 

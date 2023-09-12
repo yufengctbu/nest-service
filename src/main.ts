@@ -5,7 +5,7 @@ import { NestFactory } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
 
 import { AppModule } from '@app/app.module';
-import { LogModule } from '@app/shared/log';
+import { LogModule, LogFileService } from '@app/shared/log';
 import { validationHelper } from '@app/helpers/validate.helper';
 import { ExceptionsFilter } from '@app/filters/exception.filter';
 import { RequestIdMiddleware } from '@app/middlewares/requestId.middleware';
@@ -30,11 +30,13 @@ async function bootstrap() {
     // 注册全局过滤器
     app.useGlobalPipes(validationHelper(config.get('app.paramsError')));
 
+    const logFileService = app.get(LogFileService);
+
     // 使用全局的错误过滤器
     app.useGlobalFilters(new ExceptionsFilter());
 
     // 使用全局的数据拦截器
-    app.useGlobalInterceptors(new TransformInterceptor());
+    app.useGlobalInterceptors(new TransformInterceptor(logFileService));
 
     // 获取配置中的端口启动服务
     const port = config.get('app.port');

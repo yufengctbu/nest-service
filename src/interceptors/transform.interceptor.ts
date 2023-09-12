@@ -1,3 +1,4 @@
+import safeStringify from 'fast-safe-stringify';
 import { Observable, map } from 'rxjs';
 import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from '@nestjs/common';
 
@@ -16,7 +17,11 @@ export class TransformInterceptor implements NestInterceptor {
 
                 const requestId = context.switchToHttp().getRequest().requestId;
 
-                return customResponse(data, requestId);
+                const result = customResponse(data, requestId);
+
+                this.logFileService.file(safeStringify(result));
+
+                return result;
             }),
         );
     }

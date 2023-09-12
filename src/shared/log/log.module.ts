@@ -5,6 +5,7 @@ import { LogService } from './log.service';
 @Global()
 @Module({
     providers: [LogFileService],
+    exports: [LogFileService],
 })
 export class LogModule {
     // 导出日志的实例

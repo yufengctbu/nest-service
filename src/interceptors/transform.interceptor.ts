@@ -5,10 +5,14 @@ import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from '@nes
 import { LogFileService } from '@app/shared/log';
 import { customResponse } from '@app/helpers/response.helper';
 import { IsOriginResponse } from '@app/helpers/reflector-validate.helper';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class TransformInterceptor implements NestInterceptor {
-    public constructor(private readonly logFileService: LogFileService) {}
+    public constructor(
+        private readonly logFileService: LogFileService,
+        private readonly configService: ConfigService,
+    ) {}
 
     intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
         return next.handle().pipe(
@@ -19,7 +23,9 @@ export class TransformInterceptor implements NestInterceptor {
 
                 const result = customResponse(data, requestId);
 
-                this.logFileService.file(safeStringify(result));
+                const resLog = this.configService.get('app.logs.responseLog') || false;
+
+                if (resLog) this.logFileService.file(safeStringify(result));
 
                 return result;
             }),

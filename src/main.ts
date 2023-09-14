@@ -36,7 +36,7 @@ async function bootstrap() {
     app.useGlobalFilters(new ExceptionsFilter());
 
     // 使用全局的数据拦截器
-    app.useGlobalInterceptors(new TransformInterceptor(logFileService));
+    app.useGlobalInterceptors(new TransformInterceptor(logFileService, config));
 
     // 获取配置中的端口启动服务
     const port = config.get('app.port');

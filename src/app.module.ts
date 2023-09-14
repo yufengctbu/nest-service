@@ -1,7 +1,7 @@
 import { ConfigModule } from '@nestjs/config';
 import { Module, NestModule, MiddlewareConsumer, RequestMethod } from '@nestjs/common';
 
-import { appConfig } from '@app/configs';
+import { appConfig, databaseConfig } from '@app/configs';
 import { RoutersModule } from '@app/routers/routers.module';
 import { SharedModule } from '@app/shared/shared.module';
 import { RequestLogMiddleware } from '@app/middlewares/request-log.middleware';
@@ -11,7 +11,7 @@ import { RequestLogMiddleware } from '@app/middlewares/request-log.middleware';
         // 配置全局通用配置
         ConfigModule.forRoot({
             isGlobal: true,
-            load: [appConfig],
+            load: [appConfig, databaseConfig],
         }),
 
         // 加载路由模块

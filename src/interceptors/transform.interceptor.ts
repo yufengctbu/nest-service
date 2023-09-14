@@ -9,10 +9,14 @@ import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class TransformInterceptor implements NestInterceptor {
+    private responseLog: boolean;
+
     public constructor(
         private readonly logFileService: LogFileService,
         private readonly configService: ConfigService,
-    ) {}
+    ) {
+        this.responseLog = this.configService.get('app.logs.responseLog') || false;
+    }
 
     intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
         return next.handle().pipe(
@@ -23,9 +27,7 @@ export class TransformInterceptor implements NestInterceptor {
 
                 const result = customResponse(data, requestId);
 
-                const resLog = this.configService.get('app.logs.responseLog') || false;
-
-                if (resLog) this.logFileService.file(safeStringify(result));
+                if (this.responseLog) this.logFileService.file(safeStringify(result));
 
                 return result;
             }),

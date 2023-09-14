@@ -1,5 +1,5 @@
-import { Logger } from '@nestjs/common';
 import helmet from 'helmet';
+import { Logger } from '@nestjs/common';
 import * as compression from 'compression';
 import { NestFactory } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
@@ -33,7 +33,7 @@ async function bootstrap() {
     const logFileService = app.get(LogFileService);
 
     // 使用全局的错误过滤器
-    app.useGlobalFilters(new ExceptionsFilter());
+    app.useGlobalFilters(new ExceptionsFilter(logFileService, config));
 
     // 使用全局的数据拦截器
     app.useGlobalInterceptors(new TransformInterceptor(logFileService, config));

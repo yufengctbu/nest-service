@@ -15,19 +15,22 @@ export class LogFileService {
     }
 
     private initFileInstance(): Logger {
+        const maxSize = this.configService.get('app.logs.maxSize') || '20m';
+        const maxFiles = this.configService.get('app.logs.maxFiles') || '15d';
+
+        const defaultConfig = {
+            level: FILE_LOG, // 写入文件的日志级别
+            auditFile: 'logs/audit.log',
+            filename: 'logs/%DATE%.log',
+            datePattern: 'YYYY-MM-DD',
+            maxSize, // 每个日志文件的最大大小
+            maxFiles, // 保留的日志文件数
+        };
+
         return createLogger({
             levels: fileLevels,
             format: format.combine(format.simple(), format.timestamp(), nestConsoleFormat()),
-            transports: [
-                new DailyRotateFile({
-                    level: FILE_LOG, // 写入文件的日志级别
-                    auditFile: 'logs/audit.log',
-                    filename: 'logs/%DATE%.log',
-                    datePattern: 'YYYY-MM-DD',
-                    maxSize: '20m', // 每个日志文件的最大大小
-                    maxFiles: '15d', // 保留的日志文件数
-                }),
-            ],
+            transports: [new DailyRotateFile(defaultConfig)],
         });
     }
 

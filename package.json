@@ -1,7 +1,7 @@
 {
     "name": "nest-service",
     "version": "1.0.0",
-    "description": "",
+    "description": "a server-side architecture developed by Nest.js",
     "author": {
         "name": "yufengctbu",
         "url": "https://github.com/yufengctbu"

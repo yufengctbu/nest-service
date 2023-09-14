@@ -1,12 +1,12 @@
-import safeStringify from 'fast-safe-stringify';
 import { Request, Response } from 'express';
+import { ConfigService } from '@nestjs/config';
+import safeStringify from 'fast-safe-stringify';
 import { ExceptionFilter, Catch, ArgumentsHost, HttpException, HttpStatus, Logger } from '@nestjs/common';
 
 import { LogFileService } from '@app/shared/log';
-import { CustomException } from '@app/exceptions/custom.exception';
 import { SERVICE_ERROR_TEXT } from '@app/constants/http.constant';
 import { ERROR_CODE } from '@app/constants/error-code.constant';
-import { ConfigService } from '@nestjs/config';
+import { CustomException } from '@app/exceptions/custom.exception';
 
 @Catch()
 export class ExceptionsFilter implements ExceptionFilter {

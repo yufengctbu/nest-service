@@ -1,6 +1,6 @@
-import { IFailResponse } from '@app/interfaces/http.interface';
-import { CustomException } from './custom.exception';
 import { HttpStatus } from '@nestjs/common';
+import { CustomException } from './custom.exception';
+import { IFailResponse } from '@app/interfaces/http.interface';
 import { RESPONSE_DEFAULT_TEXT, RESPONSE_STATUS } from '@app/constants/http.constant';
 
 export class FailException extends CustomException {

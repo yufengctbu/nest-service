@@ -16,11 +16,11 @@ export class LogFileService {
 
     private initFileInstance(): Logger {
         const maxSize = this.configService.get('app.logs.maxSize') || '20m';
-        const maxFiles = this.configService.get('app.logs.maxFiles') || '15d';
+        const maxFiles = this.configService.get('app.logs.maxFiles') || '12d';
 
         const defaultConfig = {
             level: FILE_LOG, // 写入文件的日志级别
-            auditFile: 'logs/audit.log',
+            auditFile: 'logs/http-audit.log',
             filename: 'logs/http.%DATE%.log',
             datePattern: 'YYYY-MM-DD',
             maxSize, // 每个日志文件的最大大小

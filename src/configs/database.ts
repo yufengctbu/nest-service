@@ -14,5 +14,9 @@ export default registerAs('database', () => ({
         password: env.MYSQL_PASSWORD || '', // 数据库的密码
 
         database: env.MYSQL_DATABASE || '', // 数据库的名称
+
+        // typeorm的log值有分成 boolean | "all" | LogLevel[];
+        // LogLevel = "query" | "schema" | "error" | "warn" | "info" | "log" | "migration";
+        loggerOptions: false,
     },
 }));

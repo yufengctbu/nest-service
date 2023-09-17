@@ -4,12 +4,14 @@ import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 
 import { MYSQL_CONFIG_PROVIDER } from './mysql.constant';
 import { snakeNamingStrategy } from './snake-naming.strategy';
+import { MysqlFileLog } from './mysql-file-log.service';
 
 export const mysqlProvider: Provider = {
     provide: MYSQL_CONFIG_PROVIDER,
 
     useFactory: (configService: ConfigService): Promise<TypeOrmModuleOptions> | TypeOrmModuleOptions => {
         const mysqlOptions = configService.get('database.mysql');
+        const loggerOptions = mysqlOptions.loggerOptions || false;
 
         return {
             type: 'mysql',
@@ -30,7 +32,7 @@ export const mysqlProvider: Provider = {
 
             synchronize: false,
 
-            // logger:
+            logger: loggerOptions && new MysqlFileLog(configService, loggerOptions),
         };
     },
 

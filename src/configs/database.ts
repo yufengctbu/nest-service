@@ -19,4 +19,6 @@ export default registerAs('database', () => ({
         // LogLevel = "query" | "schema" | "error" | "warn" | "info" | "log" | "migration";
         loggerOptions: false,
     },
+
+    redis: {},
 }));

@@ -20,5 +20,16 @@ export default registerAs('database', () => ({
         loggerOptions: false,
     },
 
-    redis: {},
+    // redis 数据库
+    redis: {
+        host: env.REDIS_HOST, // redis HOST主机
+
+        port: parseInt(process.env.REDIS_PORT || '6379', 10), // 数据库的端口
+
+        username: process.env.REDIS_USERNAME || 'default', // 数据库的登录用户名
+
+        password: process.env.REDIS_PASSWORD || '', // 数据库的登录密码
+
+        database: process.env.REDIS_DATABASE || 0, // 数据库名称
+    },
 }));

@@ -36,8 +36,8 @@ export class RedisService {
      * @param value
      * @param expire
      */
-    public async set(key: string, value: string | number | Buffer, expire?: number): Promise<void> {
-        const expireTime = expire && isNaN(expire) ? undefined : Number(expire);
+    public async set(key: string, value: string | number | Record<string, any>, expire?: number): Promise<void> {
+        const expireTime = !expire || isNaN(expire) ? undefined : Number(expire);
 
         typeof expireTime !== 'undefined'
             ? await this.redisInstance.setex(key, expireTime, JSON.stringify(value))
@@ -56,5 +56,14 @@ export class RedisService {
         return result ? JSON.parse(result) : defaultValue;
     }
 
-    // public async delete(key: string): Promise<void> {}
+    /**
+     * 删除指定的key
+     * @param keys
+     * @returns
+     */
+    public async delete(...keys: string[]): Promise<boolean> {
+        const result = await this.redisInstance.del(...keys);
+
+        return Boolean(result);
+    }
 }

@@ -1,14 +1,9 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get } from '@nestjs/common';
 
 @Controller('page')
 export class PageController {
     @Get()
-    public index() {
+    public async index() {
         return 'ok';
-    }
-
-    @Get(':name')
-    public test(@Param() name: string) {
-        return name;
     }
 }

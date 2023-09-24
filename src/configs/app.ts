@@ -7,6 +7,8 @@ export default registerAs('app', () => ({
 
     paramsError: isDev, //是否展示参数验证的错误信息
 
+    jwtExpiresIn: '3d', // jwt的过期时间配置，具体配置可参看  https://github.com/zeit/ms.js
+
     // 日志部份配置
     logs: {
         responseLog: false, //是否把输出数据写入文件

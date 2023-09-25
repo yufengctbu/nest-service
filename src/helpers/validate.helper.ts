@@ -32,15 +32,15 @@ function exceptionFactory(validationErrors: Array<ValidationError>) {
 
 /**
  *
- * @param paramError 是否展示验证的错误信息
+ * @param displayError 是否展示验证的错误信息
  * @returns
  */
-export const validationHelper = (paramError: boolean = false): ValidationPipe => {
+export const validationHelper = (displayError: boolean = false): ValidationPipe => {
     return new ValidationPipe({
         transform: true, // 对结果进行自动转换
         // errorHttpStatusCode: HttpStatus.OK,
         exceptionFactory,
 
-        disableErrorMessages: paramError,
+        disableErrorMessages: !displayError,
     });
 };

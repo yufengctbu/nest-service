@@ -1,2 +1,4 @@
 // 保留原始的数据返回
 export const HTTP_ORIGIN_RESPONSE = '__HTTP_ORIGIN_RESPONSE__';
+
+export const PUBLIC_ACCESS_INTERFACE = '__PUBLIC_ACCESS_INTERFACE__';

@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { PassportModule } from '@nestjs/passport';
-import { JWT_SECRET_SALT } from './auth.constant';
+
 import { AuthService } from './auth.service';
 import { JwtStrategy } from './jwt.strategy';
 
@@ -12,9 +12,11 @@ import { JwtStrategy } from './jwt.strategy';
 
         JwtModule.registerAsync({
             useFactory: (configService: ConfigService) => {
+                const secret = configService.get('app.jwt.secretSalt') || '';
+
                 return {
-                    secret: JWT_SECRET_SALT,
-                    signOptions: { expiresIn: configService.get('app.jwtExpiresIn') },
+                    secret,
+                    signOptions: { expiresIn: configService.get('app.jwt.expiresIn') },
                 };
             },
             inject: [ConfigService],

@@ -4,6 +4,7 @@ enum COMMON {
 
 // 服务器错误
 enum SERVICE {
+    EMAIL_CONFIG_ERROR = 9801, // 邮件配置错误
     SERVICE_ERROR = 9900,
 }
 

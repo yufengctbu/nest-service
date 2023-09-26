@@ -17,7 +17,9 @@ export class UserService {
     ) {}
 
     public async registerUser(username: string, password: string, email: string): Promise<void> {
+        // 查询username或者email存在的用户
         const currentUser = await this.userRepository.findOne({
+            select: ['id'],
             where: [{ username }, { email }],
         });
 

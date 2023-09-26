@@ -41,7 +41,6 @@ export class MysqlFileLog extends FileLogger {
 
         const logContent = strings.map((str) => '[' + new Date().toLocaleString() + ']' + str).join('\r\n') + '\r\n';
 
-        // TODO:需要验证日志是否可以正常输出
         this.instance.log('info', logContent);
     }
 }

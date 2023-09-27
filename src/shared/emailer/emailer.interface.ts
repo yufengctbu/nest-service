@@ -3,6 +3,8 @@ export interface IEmailContentOption {
 
     to: Array<string> | string; //邮件接收邮箱地址
 
+    from?: string; // 邮件发送地址
+
     text?: string; // 邮件内容的text
 
     html?: string; // 邮件内容的html格式

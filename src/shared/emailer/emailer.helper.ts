@@ -24,6 +24,7 @@ export const createCodeHtml = (code: string, email: string): [string, string] =>
                     margin: 0;
                 }
                 .email-content {
+                    margin: 0 auto;
                     max-width: 500px;
                     width: 100%;
                     background-color: #fff;

@@ -12,7 +12,8 @@ enum SERVICE {
 
 // 用户相关的错误
 enum USER {
-    USER_ALREADY_EXISTS = 900201, // 用户已经存在
+    USER_EMAIL_EXISTS = 900201, // 用户已经存在
+    USER_EMAIL_CODE_ERROR = 900202, // 验证码有误
 }
 
 export const ERROR_CODE = {

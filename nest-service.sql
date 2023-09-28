@@ -4,7 +4,7 @@
 DROP TABLE IF EXISTS `user`;
 CREATE TABLE `user`  (
   `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'user id',
-  `username` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT 'username',
+  `username` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT 'username',
   `password` varchar(80) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT 'password',
   `email` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT 'email',
   `status` tinyint(1) UNSIGNED NOT NULL DEFAULT 1 COMMENT 'status normal 1, forbid 0',
@@ -13,7 +13,7 @@ CREATE TABLE `user`  (
   `create_at` int(11) UNSIGNED NOT NULL COMMENT 'create time',
   `update_at` int(11) UNSIGNED NOT NULL COMMENT 'update time',
   PRIMARY KEY (`id`) USING BTREE,
-  UNIQUE INDEX `uk_username`(`username`) USING BTREE,
+  INDEX `idx_username`(`username`) USING BTREE,
   UNIQUE INDEX `uk_email`(`email`) USING BTREE
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
 

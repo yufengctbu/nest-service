@@ -1,6 +1,6 @@
 import { Transform, Type } from 'class-transformer';
 import { IsEmail, IsNotEmpty, IsPositive, Length } from 'class-validator';
-import { OmitType } from '@nestjs/mapped-types';
+import { OmitType, PickType } from '@nestjs/mapped-types';
 
 export class UserDto {
     @IsPositive()
@@ -22,5 +22,12 @@ export class UserDto {
     email: string;
 }
 
+// 生成邮件验证码
+export class GenerateCodeDto extends PickType(UserDto, ['email'] as const) {}
+
 // 注册用户
-export class RegisterUserDto extends OmitType(UserDto, ['id'] as const) {}
+export class RegisterUserDto extends OmitType(UserDto, ['id', 'username'] as const) {
+    @Transform(({ value }) => value.trim())
+    @IsNotEmpty()
+    code: string;
+}

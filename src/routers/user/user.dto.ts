@@ -31,3 +31,6 @@ export class RegisterUserDto extends OmitType(UserDto, ['id', 'username'] as con
     @IsNotEmpty()
     code: string;
 }
+
+// 用户登录
+export class UserLoginDto extends PickType(UserDto, ['email', 'password'] as const) {}

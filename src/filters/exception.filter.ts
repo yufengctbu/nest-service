@@ -59,7 +59,7 @@ export class ExceptionsFilter implements ExceptionFilter {
         this.logFileService.file(resLog);
 
         // 如果需要在控制台输出错误的信息
-        if (this.consoleErrorLog) Logger.error(exception.stack);
+        if (this.consoleErrorLog) Logger.error(res, exception.stack);
 
         response.status(status).json(res);
     }

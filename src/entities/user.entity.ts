@@ -22,7 +22,4 @@ export class User extends TimeEntityBase {
 
     @Column('varchar', { nullable: false, length: 200, comment: 'avatar' })
     avatar: string;
-
-    @Column('tinyint', { nullable: false, unsigned: true, default: USER_STATUS.NORMAL, comment: 'super account' })
-    super: USER_STATUS;
 }

@@ -5,6 +5,8 @@ import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { User } from '@app/entities';
+import { USER_STATUS } from './user.constant';
+import { AuthService } from '@app/routers/auth';
 import { RedisService } from '@app/shared/redis';
 import { IUserLoginResponse } from './user.interface';
 import { userRegisterEmailPrefix } from './user.helper';
@@ -20,6 +22,7 @@ export class UserService {
         private redisService: RedisService,
         private configService: ConfigService,
         private emailerService: EmailerService,
+        private authService: AuthService,
         @InjectRepository(User) private readonly userRepository: Repository<User>,
     ) {}
 
@@ -80,8 +83,25 @@ export class UserService {
     }
 
     public async login(email: string, password: string): Promise<IUserLoginResponse> {
+        const currentUser = await this.userRepository.findOne({
+            select: ['id', 'username', 'password', 'status'],
+            where: { email },
+        });
+
+        // 如果用户不存在或者密码错误，则不允许进行登录
+        if (!currentUser || !(await bcrypt.compare(password, currentUser.password)))
+            throw new FailException(ERROR_CODE.USER.USER_LOGIN_ERROR);
+
+        const { id, username, status } = currentUser;
+
+        // 如果用户的状态不正常，那么也不允许正常登录
+        if (status !== USER_STATUS.NORMAL) throw new FailException(ERROR_CODE.USER.USER_STATUS_FORBIDDEN);
+
+        // 返回服务端的token
+        const token = this.authService.genToken({ id, username, email });
+
         return {
-            token: '',
+            token,
         };
     }
 }

@@ -5666,6 +5666,11 @@ supports-preserve-symlinks-flag@^1.0.0:
   resolved "https://mirrors.cloud.tencent.com/npm/supports-preserve-symlinks-flag/-/supports-preserve-symlinks-flag-1.0.0.tgz#6eda4bd344a3c94aea376d4cc31bc77311039e09"
   integrity sha512-ot0WnXS9fgdkgIcePe6RHNk1WA8+muPa6cSjeR3V8K27q9BB1rTE3R1p7Hv0z1ZyAc8s6Vvv8DIyWf681MAt0w==
 
+svg-capture@^1.0.1:
+  version "1.0.1"
+  resolved "https://mirrors.cloud.tencent.com/npm/svg-capture/-/svg-capture-1.0.1.tgz#b74eddc5558b44e9be28a3843c79ffe09f48ff59"
+  integrity sha512-ATX0WToAvxRGoFqlAxWFTdqFL7yg4r8LtKR/yH0mvUnKNrTKJaQqRo6um0kVdRoC2GiwjJL4bIY3kmuRBRcAFw==
+
 symbol-observable@4.0.0:
   version "4.0.0"
   resolved "https://mirrors.cloud.tencent.com/npm/symbol-observable/-/symbol-observable-4.0.0.tgz#5b425f192279e87f2f9b937ac8540d1984b39205"

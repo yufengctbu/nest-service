@@ -9,12 +9,12 @@ import { USER_STATUS } from './user.constant';
 import { AuthService } from '@app/routers/auth';
 import { RedisService } from '@app/shared/redis';
 import { IUserLoginResponse } from './user.interface';
-import { userRegisterEmailPrefix } from './user.helper';
 import { generateCode } from '@app/helpers/utils.helper';
 import { FailException } from '@app/exceptions/fail.exception';
 import { ERROR_CODE } from '@app/constants/error-code.constant';
 import { createCodeHtml, EmailerService } from '@app/shared/emailer';
 import { EMAIL_VALIDITY_PERIOD } from '@app/constants/common.constant';
+import { userRegisterEmailPrefix, userLoginCachePrefix } from './user.helper';
 
 @Injectable()
 export class UserService {
@@ -99,6 +99,22 @@ export class UserService {
 
         // 返回服务端的token
         const token = this.authService.genToken({ id, username, email });
+
+        // 如果不配置，那么则不设置过期时间
+        const expireTime = this.configService.get<number>('app.loginExpiresIn');
+
+        // 需要把相关的信息存入到redis数据库中, 并且设置过期时间
+        await this.redisService.set(
+            userLoginCachePrefix(id, email),
+            {
+                id,
+                username,
+                email,
+                roleIds: [],
+                token,
+            },
+            expireTime,
+        );
 
         return {
             token,

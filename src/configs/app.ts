@@ -9,10 +9,13 @@ export default registerAs('app', () => ({
 
     jwt: {
         expiresIn: '3d', // jwt的过期时间配置，具体配置可参看  https://github.com/zeit/ms.js
+
         secretSalt: '__jwt__yufengctbu@salt_even', // jwt的salt
     },
 
     userPwdSalt: 10, // 用户密码的salt
+
+    loginExpiresIn: 30 * 60, // 登录后不进行操作时多长时间token过期, 如果不设置, 则没有过期时间
 
     // 日志部份配置
     logs: {

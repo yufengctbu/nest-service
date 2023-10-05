@@ -29,9 +29,9 @@ export class UserController {
     // 用户登录接口
     @UsePublicInterface()
     @Post('login')
-    public async userLogin(@Body() loginInfo: UserLoginDto) {
+    public userLogin(@Body() loginInfo: UserLoginDto) {
         const { email, password } = loginInfo;
 
-        await this.userService.login(email, password);
+        return this.userService.login(email, password);
     }
 }

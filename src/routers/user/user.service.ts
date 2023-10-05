@@ -1,5 +1,6 @@
 import * as bcrypt from 'bcrypt';
 import { Repository } from 'typeorm';
+import * as svgCaptcha from 'svg-captcha';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -80,6 +81,16 @@ export class UserService {
         });
 
         await this.userRepository.save(user);
+    }
+
+    private createCaptcha(size: number = 4): svgCaptcha.CaptchaObj {
+        return svgCaptcha.create({
+            size,
+            fontSize: 50,
+            width: 100,
+            height: 34,
+            background: '#cc9966',
+        });
     }
 
     public async login(email: string, password: string): Promise<IUserLoginResponse> {

@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post, Get } from '@nestjs/common';
 
 import { UserService } from './user.service';
 import { GenerateCodeDto, RegisterUserDto, UserLoginDto } from './user.dto';
@@ -25,6 +25,11 @@ export class UserController {
 
         await this.userService.registerUser(email, password, code);
     }
+
+    // 登录验证码
+    @UsePublicInterface()
+    @Get('captcha')
+    public loginCaptcha() {}
 
     // 用户登录接口
     @UsePublicInterface()

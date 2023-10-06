@@ -1,3 +1,4 @@
+import { v4 } from 'uuid';
 import * as bcrypt from 'bcrypt';
 import { Repository } from 'typeorm';
 import * as svgCaptcha from 'svg-captcha';
@@ -6,16 +7,16 @@ import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { User } from '@app/entities';
-import { USER_STATUS } from './user.constant';
+import { USER_STATUS, USER_CAPTCHA_EXPIRE } from './user.constant';
 import { AuthService } from '@app/routers/auth';
 import { RedisService } from '@app/shared/redis';
-import { IUserLoginResponse } from './user.interface';
+import { IUserCaptchaResponse, IUserLoginResponse } from './user.interface';
 import { generateCode } from '@app/helpers/utils.helper';
 import { FailException } from '@app/exceptions/fail.exception';
 import { ERROR_CODE } from '@app/constants/error-code.constant';
 import { createCodeHtml, EmailerService } from '@app/shared/emailer';
 import { EMAIL_VALIDITY_PERIOD } from '@app/constants/common.constant';
-import { userRegisterEmailPrefix, userLoginCachePrefix } from './user.helper';
+import { userRegisterEmailPrefix, userLoginCachePrefix, userLoginCaptchaPrefix } from './user.helper';
 
 @Injectable()
 export class UserService {
@@ -83,14 +84,40 @@ export class UserService {
         await this.userRepository.save(user);
     }
 
-    private createCaptcha(size: number = 4): svgCaptcha.CaptchaObj {
-        return svgCaptcha.create({
+    /**
+     * 创建验证码
+     * @param width
+     * @param height
+     * @param size
+     * @param fontSize
+     * @param background
+     * @returns
+     */
+    public async createCaptcha(
+        width: number,
+        height: number,
+        size: number,
+        fontSize: number,
+        background: string,
+    ): Promise<IUserCaptchaResponse> {
+        const { text, data } = svgCaptcha.create({
             size,
-            fontSize: 50,
-            width: 100,
-            height: 34,
-            background: '#cc9966',
+            fontSize,
+            width,
+            height,
+            background,
         });
+
+        const captchaId = v4();
+
+        await this.redisService.set(userLoginCaptchaPrefix(captchaId), text, USER_CAPTCHA_EXPIRE);
+
+        const dataSvgImg = `data:image/svg+xml;base64,${Buffer.from(data).toString('base64')}`;
+
+        return {
+            hashId: captchaId,
+            captcha: dataSvgImg,
+        };
     }
 
     public async login(email: string, password: string): Promise<IUserLoginResponse> {

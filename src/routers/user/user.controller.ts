@@ -1,8 +1,8 @@
-import { Body, Controller, Post, Get } from '@nestjs/common';
+import { Body, Controller, Post, Get, Query } from '@nestjs/common';
 
 import { UserService } from './user.service';
-import { GenerateCodeDto, RegisterUserDto, UserLoginDto } from './user.dto';
 import { UsePublicInterface } from '@app/decorators/public.decorator';
+import { CaptchaInfoDto, GenerateCodeDto, RegisterUserDto, UserLoginDto } from './user.dto';
 
 @Controller('user')
 export class UserController {
@@ -29,7 +29,11 @@ export class UserController {
     // 登录验证码
     @UsePublicInterface()
     @Get('captcha')
-    public loginCaptcha() {}
+    public loginCaptcha(@Query() captchaInfo: CaptchaInfoDto) {
+        const { w, h, s, fs, bg } = captchaInfo;
+
+        return this.userService.createCaptcha(w, h, s, fs, bg);
+    }
 
     // 用户登录接口
     @UsePublicInterface()

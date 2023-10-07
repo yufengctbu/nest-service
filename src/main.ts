@@ -40,7 +40,7 @@ async function bootstrap() {
     app.useGlobalInterceptors(new TransformInterceptor(logFileService, config));
 
     // 使用全局守卫
-    app.useGlobalGuards(new JwtAuthGuard());
+    app.useGlobalGuards(new JwtAuthGuard(app));
 
     // 获取配置中的端口启动服务
     const port = config.get('app.port');

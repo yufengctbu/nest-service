@@ -18,7 +18,7 @@ export class AuthService {
      * 解码token
      * @param token
      */
-    public verifyToken(token: string): IPayLoad | void {
+    public verifyToken(token: string | null): IPayLoad | void {
         try {
             if (!token) return;
 

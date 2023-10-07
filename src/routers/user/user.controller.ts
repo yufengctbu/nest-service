@@ -41,4 +41,9 @@ export class UserController {
     public userLogin(@Body() loginInfo: UserLoginDto) {
         return this.userService.login(loginInfo);
     }
+
+    @Get('test')
+    public test() {
+        return 'om';
+    }
 }

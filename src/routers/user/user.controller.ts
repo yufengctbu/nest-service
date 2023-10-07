@@ -39,8 +39,6 @@ export class UserController {
     @UsePublicInterface()
     @Post('login')
     public userLogin(@Body() loginInfo: UserLoginDto) {
-        const { email, password } = loginInfo;
-
-        return this.userService.login(email, password);
+        return this.userService.login(loginInfo);
     }
 }

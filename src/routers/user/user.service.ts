@@ -7,15 +7,16 @@ import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { User } from '@app/entities';
-import { USER_STATUS, USER_CAPTCHA_EXPIRE } from './user.constant';
+import { UserLoginDto } from './user.dto';
 import { AuthService } from '@app/routers/auth';
 import { RedisService } from '@app/shared/redis';
-import { IUserCaptchaResponse, IUserLoginResponse } from './user.interface';
 import { generateCode } from '@app/helpers/utils.helper';
 import { FailException } from '@app/exceptions/fail.exception';
 import { ERROR_CODE } from '@app/constants/error-code.constant';
+import { USER_STATUS, USER_CAPTCHA_EXPIRE } from './user.constant';
 import { createCodeHtml, EmailerService } from '@app/shared/emailer';
 import { EMAIL_VALIDITY_PERIOD } from '@app/constants/common.constant';
+import { IUserCaptchaResponse, IUserLoginResponse } from './user.interface';
 import { userRegisterEmailPrefix, userLoginCachePrefix, userLoginCaptchaPrefix } from './user.helper';
 
 @Injectable()
@@ -110,7 +111,7 @@ export class UserService {
 
         const captchaId = v4();
 
-        await this.redisService.set(userLoginCaptchaPrefix(captchaId), text, USER_CAPTCHA_EXPIRE);
+        await this.redisService.set(userLoginCaptchaPrefix(captchaId), text.toLocaleLowerCase(), USER_CAPTCHA_EXPIRE);
 
         const dataSvgImg = `data:image/svg+xml;base64,${Buffer.from(data).toString('base64')}`;
 
@@ -120,7 +121,18 @@ export class UserService {
         };
     }
 
-    public async login(email: string, password: string): Promise<IUserLoginResponse> {
+    /**
+     * 用户登录
+     * @param loginInfo
+     * @returns
+     */
+    public async login(loginInfo: UserLoginDto): Promise<IUserLoginResponse> {
+        const { email, password, hashId, code } = loginInfo;
+
+        // 比对登录验证码
+        const storeLoginCaptcha = await this.redisService.get<string>(userLoginCaptchaPrefix(hashId));
+        if (!storeLoginCaptcha || storeLoginCaptcha !== code) throw new FailException(ERROR_CODE.USER.USER_CAPTCHA_ERROR);
+
         const currentUser = await this.userRepository.findOne({
             select: ['id', 'username', 'password', 'status'],
             where: { email },

@@ -5,6 +5,7 @@ import { NestFactory } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
 
 import { AppModule } from '@app/app.module';
+import { JwtAuthGuard } from '@app/guards/auth.guard';
 import { LogModule, LogFileService } from '@app/shared/log';
 import { validationHelper } from '@app/helpers/validate.helper';
 import { ExceptionsFilter } from '@app/filters/exception.filter';
@@ -37,6 +38,9 @@ async function bootstrap() {
 
     // 使用全局的数据拦截器
     app.useGlobalInterceptors(new TransformInterceptor(logFileService, config));
+
+    // 使用全局守卫
+    app.useGlobalGuards(new JwtAuthGuard());
 
     // 获取配置中的端口启动服务
     const port = config.get('app.port');

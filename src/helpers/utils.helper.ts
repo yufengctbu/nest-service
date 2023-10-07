@@ -7,6 +7,15 @@ export const getCurrentTime = (): number => {
 };
 
 /**
+ * 把前端传到服务端的token进行格式化
+ * @param token
+ * @returns
+ */
+export const formatAuthorization = (token: string | undefined): string | null => {
+    return token ? token.replace(/Bearer\s*/, '') : null;
+};
+
+/**
  * 生成指定位数的验证码
  * @param len
  * @returns

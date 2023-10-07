@@ -130,8 +130,11 @@ export class UserService {
         const { email, password, hashId, code } = loginInfo;
 
         // 比对登录验证码
-        const storeLoginCaptcha = await this.redisService.get<string>(userLoginCaptchaPrefix(hashId));
+        const captchaKey = userLoginCaptchaPrefix(hashId);
+        const storeLoginCaptcha = await this.redisService.get<string>(captchaKey);
         if (!storeLoginCaptcha || storeLoginCaptcha !== code) throw new FailException(ERROR_CODE.USER.USER_CAPTCHA_ERROR);
+        // 删除已验证的验证码
+        await this.redisService.delete(captchaKey);
 
         const currentUser = await this.userRepository.findOne({
             select: ['id', 'username', 'password', 'status'],

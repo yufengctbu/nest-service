@@ -1,6 +1,7 @@
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Post, Put, Query } from '@nestjs/common';
+
 import { RoleService } from './role.service';
-import { CreateRoleDto, RoleListDto } from './role.dto';
+import { CreateRoleDto, ModifyRoleDto, RoleListDto } from './role.dto';
 
 @Controller('role')
 export class RoleController {
@@ -18,5 +19,13 @@ export class RoleController {
         const { name, desc = '' } = roleInfo;
 
         await this.roleService.createRole(name, desc);
+    }
+
+    // 修改角色信息
+    @Put()
+    public async modifyRole(@Body() roleInfo: ModifyRoleDto) {
+        const { id, name, desc } = roleInfo;
+
+        await this.roleService.modifyRole(id, name, desc);
     }
 }

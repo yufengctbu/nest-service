@@ -60,4 +60,12 @@ export class RoleService {
 
         await this.roleRepository.save(roleInfo);
     }
+
+    /**
+     * 修改角色信息
+     * @param id
+     * @param name
+     * @param description
+     */
+    public async modifyRole(id: number, name: string, description: string): Promise<void> {}
 }

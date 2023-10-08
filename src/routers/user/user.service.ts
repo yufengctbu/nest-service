@@ -16,7 +16,7 @@ import { ERROR_CODE } from '@app/constants/error-code.constant';
 import { USER_STATUS, USER_CAPTCHA_EXPIRE } from './user.constant';
 import { createCodeHtml, EmailerService } from '@app/shared/emailer';
 import { EMAIL_VALIDITY_PERIOD } from '@app/constants/common.constant';
-import { IUserCaptchaResponse, IUserLoginResponse } from './user.interface';
+import { IUserCaptchaResponse, IUserInfo, IUserLoginResponse } from './user.interface';
 import { userRegisterEmailPrefix, userLoginCachePrefix, userLoginCaptchaPrefix } from './user.helper';
 
 @Injectable()
@@ -171,6 +171,24 @@ export class UserService {
 
         return {
             token,
+        };
+    }
+
+    /**
+     * 查询用户信息
+     * @param userId
+     * @returns
+     */
+    public async queryUserProfile(userId: number): Promise<IUserInfo> {
+        const userProfile = await this.userRepository.findOne({
+            select: ['id', 'username', 'email', 'avatar'],
+            where: { id: userId },
+        });
+
+        if (!userProfile) throw new FailException(ERROR_CODE.USER.USER_PROFILE_ERROR);
+
+        return {
+            ...userProfile,
         };
     }
 }

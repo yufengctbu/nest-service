@@ -10,14 +10,19 @@ export interface IUserCaptchaResponse {
     captcha: string;
 }
 
-// 缓存中用户的信息
-export interface IUserLoginCache {
+// 用户的基础信息
+export interface IUserInfo {
     id: number;
 
     username: string;
 
     email: string;
 
+    avatar: string;
+}
+
+// 缓存中用户的信息
+export interface IUserLoginCache extends Omit<IUserInfo, 'avatar'> {
     roleIds: number[];
 
     token: string;

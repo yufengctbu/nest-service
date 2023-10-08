@@ -1,6 +1,8 @@
 import { Body, Controller, Post, Get, Query } from '@nestjs/common';
 
+import { IPayLoad } from '@app/routers/auth';
 import { UserService } from './user.service';
+import { User } from '@app/decorators/user.decorator';
 import { UsePublicInterface } from '@app/decorators/public.decorator';
 import { CaptchaInfoDto, GenerateCodeDto, RegisterUserDto, UserLoginDto } from './user.dto';
 
@@ -42,8 +44,11 @@ export class UserController {
         return this.userService.login(loginInfo);
     }
 
-    @Get('test')
-    public test() {
-        return 'om';
+    // 获取用户信息
+    @Get('profile')
+    public userProfile(@User() userInfo: IPayLoad) {
+        const { id } = userInfo;
+
+        return this.userService.queryUserProfile(id);
     }
 }

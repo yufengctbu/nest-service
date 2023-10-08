@@ -175,6 +175,17 @@ export class UserService {
     }
 
     /**
+     * 用户登出
+     * @param id
+     * @param email
+     */
+    public async logout(id: number, email: string): Promise<void> {
+        const redisHandle = userLoginCachePrefix(id, email);
+
+        await this.redisService.delete(redisHandle);
+    }
+
+    /**
      * 查询用户信息
      * @param userId
      * @returns

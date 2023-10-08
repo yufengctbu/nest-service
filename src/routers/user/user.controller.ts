@@ -44,6 +44,14 @@ export class UserController {
         return this.userService.login(loginInfo);
     }
 
+    // 用户登出
+    @Post('logout')
+    public async userLogout(@User() userInfo: IPayLoad) {
+        const { id, email } = userInfo;
+
+        await this.userService.logout(id, email);
+    }
+
     // 获取用户信息
     @Get('profile')
     public userProfile(@User() userInfo: IPayLoad) {

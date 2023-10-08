@@ -24,7 +24,7 @@ DROP TABLE IF EXISTS `role`;
 CREATE TABLE `role`(
     `id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'role id',
     `name` VARCHAR(60) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT 'role name',
-    `description` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT 'role description',
+    `description` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT 'role description',
     `create_at` int(11) UNSIGNED NOT NULL COMMENT 'create time',
     `update_at` int(11) UNSIGNED NOT NULL COMMENT 'update time',
     PRIMARY KEY (`id`) USING BTREE,

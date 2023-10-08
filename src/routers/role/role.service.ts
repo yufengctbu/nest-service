@@ -5,6 +5,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Role } from '@app/entities';
 import { RoleListDto } from './role.dto';
 import { IRoleListResponse } from './role.interface';
+import { FailException } from '@app/exceptions/fail.exception';
+import { ERROR_CODE } from '@app/constants/error-code.constant';
 
 @Injectable()
 export class RoleService {
@@ -36,5 +38,26 @@ export class RoleService {
                 pageSize: pageSize ?? count,
             },
         };
+    }
+
+    /**
+     * 创建新角色
+     * @param name
+     * @param description
+     */
+    public async createRole(name: string, description: string): Promise<void> {
+        const currentRole = await this.roleRepository.findOne({
+            select: ['id'],
+            where: { name },
+        });
+
+        if (currentRole) throw new FailException(ERROR_CODE.COMMON.RECORD_EXITS);
+
+        const roleInfo = this.roleRepository.create({
+            name,
+            description,
+        });
+
+        await this.roleRepository.save(roleInfo);
     }
 }

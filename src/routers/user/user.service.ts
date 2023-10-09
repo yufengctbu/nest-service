@@ -219,8 +219,6 @@ export class UserService {
 
         const rolesId = roles.split(',').map((item) => Number(item));
 
-        if (rolesId.some((item) => isNaN(item))) throw new FailException(ERROR_CODE.COMMON.PARAM_ERROR);
-
         const roleList = await this.dataSource.getRepository(Role).findBy({ id: In(rolesId) });
 
         // 删除掉该用户的所有信息再进行授角

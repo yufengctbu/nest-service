@@ -1,6 +1,6 @@
 import { PaginationDto } from '@app/dtos/pagination.dto';
 import { Transform, Type } from 'class-transformer';
-import { IsInt, IsNotEmpty, IsPositive, Length } from 'class-validator';
+import { IsInt, IsNotEmpty, IsOptional, IsPositive, Length } from 'class-validator';
 
 export class RoleListDto extends PaginationDto {}
 
@@ -12,8 +12,8 @@ export class CreateRoleDto {
     name: string;
 
     @Length(0, 200)
-    @IsNotEmpty()
-    desc: string;
+    @IsOptional()
+    desc: string = '';
 }
 
 // 修改角色信息

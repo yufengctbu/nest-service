@@ -67,5 +67,15 @@ export class RoleService {
      * @param name
      * @param description
      */
-    public async modifyRole(id: number, name: string, description: string): Promise<void> {}
+    public async modifyRole(id: number, name: string, description: string): Promise<void> {
+        const targetRole = await this.roleRepository.findOneBy({ id });
+
+        // 如果不存在说明角色不存在
+        if (!targetRole) throw new FailException(ERROR_CODE.COMMON.RECORD_NOT_EXISTS);
+
+        targetRole.name = name;
+        targetRole.description = description;
+
+        await this.roleRepository.save(targetRole);
+    }
 }

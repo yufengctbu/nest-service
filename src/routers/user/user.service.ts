@@ -1,12 +1,12 @@
 import { v4 } from 'uuid';
 import * as bcrypt from 'bcrypt';
-import { Repository } from 'typeorm';
 import * as svgCaptcha from 'svg-captcha';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
+import { In, Repository, DataSource, EntityManager } from 'typeorm';
 
-import { User } from '@app/entities';
+import { Role, User, UserRole } from '@app/entities';
 import { UserLoginDto } from './user.dto';
 import { AuthService } from '@app/routers/auth';
 import { RedisService } from '@app/shared/redis';
@@ -26,6 +26,7 @@ export class UserService {
         private configService: ConfigService,
         private emailerService: EmailerService,
         private authService: AuthService,
+        private readonly dataSource: DataSource,
         @InjectRepository(User) private readonly userRepository: Repository<User>,
     ) {}
 
@@ -201,5 +202,41 @@ export class UserService {
         return {
             ...userProfile,
         };
+    }
+
+    /**
+     * 给用户分配角色
+     * @param uid
+     * @param roles
+     */
+    public async distributeUserRoles(uid: number, roles: string = ''): Promise<void> {
+        const targetUser = await this.userRepository.findOne({
+            select: ['id'],
+            where: { id: uid },
+        });
+
+        if (!targetUser) throw new FailException(ERROR_CODE.USER.USER_NOT_EXISTS);
+
+        const rolesId = roles.split(',').map((item) => Number(item));
+
+        if (rolesId.some((item) => isNaN(item))) throw new FailException(ERROR_CODE.COMMON.PARAM_ERROR);
+
+        const roleList = await this.dataSource.getRepository(Role).findBy({ id: In(rolesId) });
+
+        // 删除掉该用户的所有信息再进行授角
+        await this.dataSource.transaction(async (transactionalEntityManager: EntityManager) => {
+            await transactionalEntityManager.delete(UserRole, { userId: uid });
+
+            if (roleList.length > 0) {
+                const relations = roleList.map((item: Role) =>
+                    transactionalEntityManager.create(UserRole, {
+                        userId: uid,
+                        role: item,
+                    }),
+                );
+
+                await transactionalEntityManager.save(UserRole, relations);
+            }
+        });
     }
 }

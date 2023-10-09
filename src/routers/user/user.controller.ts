@@ -4,7 +4,7 @@ import { IPayLoad } from '@app/routers/auth';
 import { UserService } from './user.service';
 import { User } from '@app/decorators/user.decorator';
 import { UsePublicInterface } from '@app/decorators/public.decorator';
-import { CaptchaInfoDto, GenerateCodeDto, RegisterUserDto, UserLoginDto } from './user.dto';
+import { AssignUserRolesDto, CaptchaInfoDto, GenerateCodeDto, RegisterUserDto, UserLoginDto } from './user.dto';
 
 @Controller('user')
 export class UserController {
@@ -58,5 +58,13 @@ export class UserController {
         const { id } = userInfo;
 
         return this.userService.queryUserProfile(id);
+    }
+
+    // 给用户分配角色
+    @Post('assign-roles')
+    public async assignUserRoles(@Body() assignRoleInfo: AssignUserRolesDto) {
+        const { uid, roles } = assignRoleInfo;
+
+        await this.userService.distributeUserRoles(uid, roles);
     }
 }

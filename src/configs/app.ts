@@ -15,7 +15,7 @@ export default registerAs('app', () => ({
 
     userPwdSalt: 10, // 用户密码的salt
 
-    loginExpiresIn: 30 * 60, // 登录后不进行操作时多长时间token过期, 如果不设置, 则没有过期时间
+    loginExpiresIn: 60 * 60, // 登录后不进行操作时多长时间token过期, 如果不设置, 则没有过期时间
 
     // 日志部份配置
     logs: {

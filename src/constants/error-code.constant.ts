@@ -20,6 +20,7 @@ enum USER {
     USER_CAPTCHA_ERROR = 900204, // 用户登录验证码有误
     USER_STATUS_FORBIDDEN = 900205, //用户状态不正常
     USER_PROFILE_ERROR = 900206, // 查询用户信息错误
+    USER_NOT_EXISTS = 900207, // 用户不存在
 }
 
 export const ERROR_CODE = {

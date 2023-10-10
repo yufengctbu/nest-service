@@ -1,6 +1,6 @@
 import { Transform, Type } from 'class-transformer';
 import { OmitType, PickType } from '@nestjs/mapped-types';
-import { IsDefined, IsEmail, IsInt, IsNotEmpty, IsOptional, IsPositive, IsString, IsUUID, Length, Matches } from 'class-validator';
+import { IsDefined, IsEmail, IsIn, IsInt, IsNotEmpty, IsOptional, IsPositive, IsString, IsUUID, Length, Matches } from 'class-validator';
 
 import {
     USER_CAPTCHA_BACKGROUND,
@@ -8,6 +8,7 @@ import {
     USER_CAPTCHA_HEIGHT,
     USER_CAPTCHA_SIZE,
     USER_CAPTCHA_WIDTH,
+    USER_EMAIL_TYPE,
 } from './user.constant';
 
 export class UserDto {
@@ -31,8 +32,14 @@ export class UserDto {
     email: string;
 }
 
-// 生成邮件验证码
-export class GenerateCodeDto extends PickType(UserDto, ['email'] as const) {}
+// 生成邮件验证码(注册与更改密码)
+export class GenerateCodeDto extends PickType(UserDto, ['email'] as const) {
+    @IsIn(Object.values(USER_EMAIL_TYPE))
+    @IsInt()
+    @Type(() => Number)
+    @IsOptional()
+    type: number = USER_EMAIL_TYPE.REGISTER;
+}
 
 // 注册用户
 export class RegisterUserDto extends OmitType(UserDto, ['id', 'username'] as const) {
@@ -40,6 +47,9 @@ export class RegisterUserDto extends OmitType(UserDto, ['id', 'username'] as con
     @IsNotEmpty()
     code: string;
 }
+
+// 用户修改密码
+export class ModifyUserPwdDto extends RegisterUserDto {}
 
 // 用户登录
 export class UserLoginDto extends PickType(UserDto, ['email', 'password'] as const) {

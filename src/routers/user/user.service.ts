@@ -6,15 +6,15 @@ import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository, DataSource, EntityManager } from 'typeorm';
 
-import { Role, User, UserRole } from '@app/entities';
 import { UserLoginDto } from './user.dto';
 import { AuthService } from '@app/routers/auth';
 import { RedisService } from '@app/shared/redis';
+import { Role, User, UserRole } from '@app/entities';
 import { generateCode } from '@app/helpers/utils.helper';
 import { FailException } from '@app/exceptions/fail.exception';
 import { ERROR_CODE } from '@app/constants/error-code.constant';
-import { USER_STATUS, USER_CAPTCHA_EXPIRE } from './user.constant';
-import { createCodeHtml, EmailerService } from '@app/shared/emailer';
+import { USER_STATUS, USER_CAPTCHA_EXPIRE, USER_EMAIL_TYPE } from './user.constant';
+import { createRegisterCodeHtml, createModifyPasswordCodeHtml, EmailerService } from '@app/shared/emailer';
 import { EMAIL_VALIDITY_PERIOD } from '@app/constants/common.constant';
 import { IUserCaptchaResponse, IUserInfo, IUserLoginResponse } from './user.interface';
 import { userRegisterEmailPrefix, userLoginCachePrefix, userLoginCaptchaPrefix } from './user.helper';
@@ -31,21 +31,26 @@ export class UserService {
     ) {}
 
     /**
-     * 生成注册的验证码
+     * 生成验证码
+     * @param type
      * @param email
      */
-    public async generateCode(email: string): Promise<void> {
+    public async generateCode(type: USER_EMAIL_TYPE, email: string): Promise<void> {
         const currentUser = await this.userRepository.findOneBy({ email });
 
-        // 如果当前的邮件已经被注册
-        if (currentUser) throw new FailException(ERROR_CODE.USER.USER_EMAIL_EXISTS);
+        // 如果是注册，那么需要验证当前的邮件是否已被注册
+        if (currentUser && type === USER_EMAIL_TYPE.REGISTER) throw new FailException(ERROR_CODE.USER.USER_EMAIL_EXISTS);
+
+        // 如果是重置密码，需要验证当前用户是否存在
+        if (!currentUser && type === USER_EMAIL_TYPE.PASSWORD_RESET) throw new FailException(ERROR_CODE.USER.USER_NOT_EXISTS);
 
         // 生成验证码
         const code = generateCode();
         // 生成邮件内容
-        const [subject, html] = createCodeHtml(code, email);
+        const [subject, html] =
+            type === USER_EMAIL_TYPE.PASSWORD_RESET ? createModifyPasswordCodeHtml(code, email) : createRegisterCodeHtml(code, email);
 
-        await this.redisService.set(userRegisterEmailPrefix(email), code, EMAIL_VALIDITY_PERIOD);
+        await this.redisService.set(userRegisterEmailPrefix(type, email), code, EMAIL_VALIDITY_PERIOD);
 
         // 发送邮件
         await this.emailerService.sendEmail({
@@ -62,8 +67,8 @@ export class UserService {
      * @param code
      */
     public async registerUser(email: string, password: string, code: string): Promise<void> {
-        //验证邮箱验证码的正确性
-        const emailCode = await this.redisService.get<string>(userRegisterEmailPrefix(email));
+        //验证注册时邮箱验证码的正确性
+        const emailCode = await this.redisService.get<string>(userRegisterEmailPrefix(USER_EMAIL_TYPE.REGISTER, email));
 
         if (!emailCode || emailCode !== code) throw new FailException(ERROR_CODE.USER.USER_EMAIL_CODE_ERROR);
 
@@ -85,6 +90,14 @@ export class UserService {
 
         await this.userRepository.save(user);
     }
+
+    /**
+     * 修改用户密码
+     * @param email
+     * @param password
+     * @param code
+     */
+    public async modifyUserPassword(email: string, password: string, code: string): Promise<void> {}
 
     /**
      * 创建验证码

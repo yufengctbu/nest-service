@@ -4,6 +4,13 @@ export enum USER_STATUS {
     NORMAL, // 正常状态
 }
 
+// 发送邮件的类别
+export enum USER_EMAIL_TYPE {
+    REGISTER, // 注册
+
+    PASSWORD_RESET, // 密码重置
+}
+
 export const USER_CAPTCHA_WIDTH = 100;
 export const USER_CAPTCHA_HEIGHT = 34;
 export const USER_CAPTCHA_SIZE = 4;

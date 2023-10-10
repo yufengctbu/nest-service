@@ -1,10 +1,10 @@
-import { Body, Controller, Post, Get, Query } from '@nestjs/common';
+import { Body, Controller, Post, Get, Query, Put } from '@nestjs/common';
 
 import { IPayLoad } from '@app/routers/auth';
 import { UserService } from './user.service';
 import { User } from '@app/decorators/user.decorator';
 import { UsePublicInterface } from '@app/decorators/public.decorator';
-import { AssignUserRolesDto, CaptchaInfoDto, GenerateCodeDto, RegisterUserDto, UserLoginDto } from './user.dto';
+import { AssignUserRolesDto, CaptchaInfoDto, GenerateCodeDto, ModifyUserPwdDto, RegisterUserDto, UserLoginDto } from './user.dto';
 
 @Controller('user')
 export class UserController {
@@ -14,9 +14,9 @@ export class UserController {
     @UsePublicInterface()
     @Post('code')
     public async generateEmailCode(@Body() generateCodeInfo: GenerateCodeDto) {
-        const { email } = generateCodeInfo;
+        const { type, email } = generateCodeInfo;
 
-        await this.userService.generateCode(email);
+        await this.userService.generateCode(type, email);
     }
 
     // 注册接口，无需进行登录验证
@@ -26,6 +26,15 @@ export class UserController {
         const { password, email, code } = registerInfo;
 
         await this.userService.registerUser(email, password, code);
+    }
+
+    // 修改密码
+    @UsePublicInterface()
+    @Put('password-reset')
+    public async modifyUserPassword(@Body() modifyInfo: ModifyUserPwdDto) {
+        const { password, email, code } = modifyInfo;
+
+        await this.userService.modifyUserPassword(email, password, code);
     }
 
     // 登录验证码

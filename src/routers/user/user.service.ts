@@ -97,7 +97,22 @@ export class UserService {
      * @param password
      * @param code
      */
-    public async modifyUserPassword(email: string, password: string, code: string): Promise<void> {}
+    public async modifyUserPassword(email: string, password: string, code: string): Promise<void> {
+        // 获取缓存中存储的code
+        const storeCode = await this.redisService.get<string>(userRegisterEmailPrefix(USER_EMAIL_TYPE.PASSWORD_RESET, email));
+
+        if (!storeCode || storeCode !== code) throw new FailException(ERROR_CODE.USER.USER_EMAIL_CODE_ERROR);
+
+        const targetUser = await this.userRepository.findOneBy({ email });
+        if (!targetUser) throw new FailException(ERROR_CODE.USER.USER_NOT_EXISTS);
+
+        const salt = this.configService.get('app.userPwdSalt') || '';
+        targetUser.password = await bcrypt.hash(password, salt);
+
+        await this.userRepository.save(targetUser);
+        // 修改密码后，需要用户重新登录
+        await this.redisService.delete(userLoginCachePrefix(targetUser.id, email));
+    }
 
     /**
      * 创建验证码

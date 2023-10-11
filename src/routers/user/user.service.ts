@@ -13,11 +13,11 @@ import { Role, User, UserRole } from '@app/entities';
 import { generateCode } from '@app/helpers/utils.helper';
 import { FailException } from '@app/exceptions/fail.exception';
 import { ERROR_CODE } from '@app/constants/error-code.constant';
-import { USER_STATUS, USER_CAPTCHA_EXPIRE, USER_EMAIL_TYPE } from './user.constant';
-import { createRegisterCodeHtml, createModifyPasswordCodeHtml, EmailerService } from '@app/shared/emailer';
 import { EMAIL_VALIDITY_PERIOD } from '@app/constants/common.constant';
+import { USER_STATUS, USER_CAPTCHA_EXPIRE, USER_EMAIL_TYPE } from './user.constant';
 import { IUserCaptchaResponse, IUserInfo, IUserLoginResponse } from './user.interface';
 import { userRegisterEmailPrefix, userLoginCachePrefix, userLoginCaptchaPrefix } from './user.helper';
+import { createRegisterCodeHtml, createModifyPasswordCodeHtml, EmailerService } from '@app/shared/emailer';
 
 @Injectable()
 export class UserService {
@@ -162,19 +162,32 @@ export class UserService {
         const captchaKey = userLoginCaptchaPrefix(hashId);
         const storeLoginCaptcha = await this.redisService.get<string>(captchaKey);
         if (!storeLoginCaptcha || storeLoginCaptcha !== code) throw new FailException(ERROR_CODE.USER.USER_CAPTCHA_ERROR);
-        // 删除已验证的验证码
-        await this.redisService.delete(captchaKey);
 
-        const currentUser = await this.userRepository.findOne({
-            select: ['id', 'username', 'password', 'status'],
-            where: { email },
-        });
+        // 查询用户以及相关的角色
+        const subQuery = this.dataSource
+            .createQueryBuilder(UserRole, 'ur')
+            .select(['ur.userId AS userId', 'GROUP_CONCAT(ur.role) AS roles'])
+            .groupBy('ur.userId')
+            .getQuery();
+
+        const currentUser = await this.userRepository
+            .createQueryBuilder('user')
+            .select([
+                'user.id AS id',
+                'user.username AS username',
+                'user.password AS password',
+                'user.status AS status',
+                'ur.roles AS roles',
+            ])
+            .leftJoin(`(${subQuery})`, 'ur', 'ur.userId=user.id')
+            .where('user.email=:email', { email })
+            .getRawOne();
 
         // 如果用户不存在或者密码错误，则不允许进行登录
         if (!currentUser || !(await bcrypt.compare(password, currentUser.password)))
             throw new FailException(ERROR_CODE.USER.USER_LOGIN_ERROR);
 
-        const { id, username, status } = currentUser;
+        const { id, username, status, roles } = currentUser;
 
         // 如果用户的状态不正常，那么也不允许正常登录
         if (status !== USER_STATUS.NORMAL) throw new FailException(ERROR_CODE.USER.USER_STATUS_FORBIDDEN);
@@ -192,11 +205,14 @@ export class UserService {
                 id,
                 username,
                 email,
-                roleIds: [],
+                roleIds: roles ? roles.split(',').map((item: string) => Number(item)) : [],
                 token,
             },
             expireTime,
         );
+
+        // 删除已验证的验证码
+        await this.redisService.delete(captchaKey);
 
         return {
             token,

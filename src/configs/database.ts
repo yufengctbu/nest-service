@@ -17,7 +17,7 @@ export default registerAs('database', () => ({
 
         // typeorm的log值有分成 boolean | "all" | LogLevel[];
         // LogLevel = "query" | "schema" | "error" | "warn" | "info" | "log" | "migration";
-        loggerOptions: false,
+        loggerOptions: ['error'],
     },
 
     // redis 数据库

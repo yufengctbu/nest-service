@@ -4,13 +4,13 @@ import * as svgCaptcha from 'svg-captcha';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository, DataSource, EntityManager } from 'typeorm';
+import { Repository, DataSource } from 'typeorm';
 
 import { UserLoginDto } from './user.dto';
-import { AuthService } from '@app/routers/auth';
 import { RedisService } from '@app/shared/redis';
-import { Role, User, UserRole } from '@app/entities';
+import { User, UserRole } from '@app/entities';
 import { generateCode } from '@app/helpers/utils.helper';
+import { AuthService } from '@app/routers/auth/auth.service';
 import { FailException } from '@app/exceptions/fail.exception';
 import { ERROR_CODE } from '@app/constants/error-code.constant';
 import { EMAIL_VALIDITY_PERIOD } from '@app/constants/common.constant';
@@ -246,39 +246,5 @@ export class UserService {
         return {
             ...userProfile,
         };
-    }
-
-    /**
-     * 给用户分配角色
-     * @param uid
-     * @param roles
-     */
-    public async distributeUserRoles(uid: number, roles: string = ''): Promise<void> {
-        const targetUser = await this.userRepository.findOne({
-            select: ['id'],
-            where: { id: uid },
-        });
-
-        if (!targetUser) throw new FailException(ERROR_CODE.USER.USER_NOT_EXISTS);
-
-        const rolesId = roles.split(',').map((item) => Number(item));
-
-        const roleList = await this.dataSource.getRepository(Role).findBy({ id: In(rolesId) });
-
-        // 删除掉该用户的所有信息再进行授角
-        await this.dataSource.transaction(async (transactionalEntityManager: EntityManager) => {
-            await transactionalEntityManager.delete(UserRole, { userId: uid });
-
-            if (roleList.length > 0) {
-                const relations = roleList.map((item: Role) =>
-                    transactionalEntityManager.create(UserRole, {
-                        userId: uid,
-                        role: item,
-                    }),
-                );
-
-                await transactionalEntityManager.save(UserRole, relations);
-            }
-        });
     }
 }

@@ -4,10 +4,11 @@ import { INestApplication } from '@nestjs/common/interfaces';
 import { ConfigService } from '@nestjs/config';
 import { ExecutionContext, UnauthorizedException } from '@nestjs/common';
 
-import { AuthService } from '@app/routers/auth';
+import { AuthService } from '@app/routers/auth/auth.service';
 import { RedisService } from '@app/shared/redis';
 import { formatAuthorization } from '@app/helpers/utils.helper';
-import { IUserLoginCache, userLoginCachePrefix } from '@app/routers/user';
+import { IUserLoginCache } from '@app/routers/user/user.interface';
+import { userLoginCachePrefix } from '@app/routers/user/user.helper';
 import { IsPublicInterface } from '@app/helpers/reflector-validate.helper';
 
 export class JwtAuthGuard extends AuthGuard('jwt') {

@@ -1,6 +1,6 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
-import { USER_STATUS } from '@app/routers/user';
+import { USER_STATUS } from '@app/routers/user/user.constant';
 import { TimeEntityBase } from './lib/time-entity-base';
 
 @Entity()

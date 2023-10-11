@@ -1,4 +1,4 @@
-import { IPayLoad } from '@app/routers/auth';
+import { IPayLoad } from '@app/routers/auth/auth.interface';
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
 
 // 获取用户信息

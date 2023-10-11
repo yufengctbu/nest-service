@@ -1,10 +1,10 @@
 import { Body, Controller, Post, Get, Query, Put } from '@nestjs/common';
 
-import { IPayLoad } from '@app/routers/auth';
+import { IPayLoad } from '@app/routers/auth/auth.interface';
 import { UserService } from './user.service';
 import { User } from '@app/decorators/user.decorator';
 import { UsePublicInterface } from '@app/decorators/public.decorator';
-import { AssignUserRolesDto, CaptchaInfoDto, GenerateCodeDto, ModifyUserPwdDto, RegisterUserDto, UserLoginDto } from './user.dto';
+import { CaptchaInfoDto, GenerateCodeDto, ModifyUserPwdDto, RegisterUserDto, UserLoginDto } from './user.dto';
 
 @Controller('user')
 export class UserController {
@@ -67,13 +67,5 @@ export class UserController {
         const { id } = userInfo;
 
         return this.userService.queryUserProfile(id);
-    }
-
-    // 给用户分配角色
-    @Post('assign-roles')
-    public async assignUserRoles(@Body() assignRoleInfo: AssignUserRolesDto) {
-        const { uid, roles } = assignRoleInfo;
-
-        await this.userService.distributeUserRoles(uid, roles);
     }
 }

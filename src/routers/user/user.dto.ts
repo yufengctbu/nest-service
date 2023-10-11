@@ -1,6 +1,6 @@
 import { Transform, Type } from 'class-transformer';
 import { OmitType, PickType } from '@nestjs/mapped-types';
-import { IsDefined, IsEmail, IsIn, IsInt, IsNotEmpty, IsOptional, IsPositive, IsString, IsUUID, Length, Matches } from 'class-validator';
+import { IsEmail, IsIn, IsInt, IsNotEmpty, IsOptional, IsPositive, IsString, IsUUID, Length, Matches } from 'class-validator';
 
 import {
     USER_CAPTCHA_BACKGROUND,
@@ -98,20 +98,4 @@ export class CaptchaInfoDto {
     @Transform(({ value }) => `#${value}`)
     @IsOptional()
     bg: string = USER_CAPTCHA_BACKGROUND;
-}
-
-// 给用户分配角色
-export class AssignUserRolesDto {
-    // 用户id
-    @IsPositive()
-    @IsInt()
-    @Type(() => Number)
-    @IsNotEmpty()
-    uid: number;
-
-    // 角色id,多个角色id中间用,隔开
-    @Transform(({ value }) => value.trim())
-    @Type(() => String)
-    @IsDefined()
-    roles: string;
 }

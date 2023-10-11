@@ -8,7 +8,7 @@ export class RoleController {
     public constructor(private readonly roleService: RoleService) {}
 
     // 获取角色列表
-    @Get()
+    @Get('list')
     public async roleList(@Query() queryInfo: RoleListDto) {
         return this.roleService.queryRoleList(queryInfo);
     }

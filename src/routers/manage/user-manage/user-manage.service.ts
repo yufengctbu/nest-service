@@ -5,11 +5,17 @@ import { DataSource, Repository, In, EntityManager } from 'typeorm';
 import { User, Role, UserRole } from '@app/entities';
 import { ERROR_CODE } from '@app/constants/error-code.constant';
 import { FailException } from '@app/exceptions/fail.exception';
+import { userLoginCachePrefix } from '@app/routers/user/user.helper';
+import { RedisService } from '@app/shared/redis';
+import { IUserLoginCache } from '@app/routers/user/user.interface';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class UserManageService {
     public constructor(
         private readonly dataSource: DataSource,
+        private readonly redisService: RedisService,
+        private readonly configService: ConfigService,
         @InjectRepository(User) private readonly userRepository: Repository<User>,
     ) {}
 
@@ -20,7 +26,7 @@ export class UserManageService {
      */
     public async distributeUserRoles(uid: number, roles: string = ''): Promise<void> {
         const targetUser = await this.userRepository.findOne({
-            select: ['id'],
+            select: ['id', 'email'],
             where: { id: uid },
         });
 
@@ -46,6 +52,14 @@ export class UserManageService {
             }
         });
 
-        // TODO:需要重新修改登录信息里的角色
+        const userStoreHandle = userLoginCachePrefix(targetUser.id, targetUser.email);
+        const userInfo = await this.redisService.get<IUserLoginCache>(userStoreHandle);
+        // 如果不配置，那么则不设置过期时间
+        const expireTime = this.configService.get<number>('app.loginExpiresIn');
+
+        if (userInfo) {
+            userInfo.roleIds = roleList.map((item) => item.id);
+            await this.redisService.set(userStoreHandle, userInfo, expireTime);
+        }
     }
 }

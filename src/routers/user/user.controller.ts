@@ -1,6 +1,6 @@
 import { Body, Controller, Post, Get, Query, Put } from '@nestjs/common';
 
-import { IPayLoad } from '@app/routers/auth/auth.interface';
+import { IPayLoad } from '@app/shared/auth';
 import { UserService } from './user.service';
 import { User } from '@app/decorators/user.decorator';
 import { UsePublicInterface } from '@app/decorators/public.decorator';

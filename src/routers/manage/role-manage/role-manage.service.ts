@@ -3,13 +3,14 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { Role } from '@app/entities';
-import { RoleListDto } from './role.dto';
-import { IRoleListResponse } from './role.interface';
+
+import { RoleListDto } from './role-manage.dto';
+import { IRoleListResponse } from './role-manage.interface';
 import { FailException } from '@app/exceptions/fail.exception';
 import { ERROR_CODE } from '@app/constants/error-code.constant';
 
 @Injectable()
-export class RoleService {
+export class RoleManageService {
     public constructor(@InjectRepository(Role) private readonly roleRepository: Repository<Role>) {}
 
     /**

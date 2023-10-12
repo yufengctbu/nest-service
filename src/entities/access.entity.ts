@@ -2,7 +2,7 @@ import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
 
 import { TimeEntityBase } from './lib/time-entity-base';
 import { AccessCategory } from './access-category.entity';
-import { ACCESS_TYPE, ACCESS_ACTION } from '@app/routers/access/access.constant';
+import { ACCESS_TYPE, ACCESS_ACTION } from '@app/routers/manage/access-manage/access-manage.constant';
 
 @Entity()
 export class Access extends TimeEntityBase {

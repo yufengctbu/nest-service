@@ -4,7 +4,7 @@ import { INestApplication } from '@nestjs/common/interfaces';
 import { ConfigService } from '@nestjs/config';
 import { ExecutionContext, UnauthorizedException } from '@nestjs/common';
 
-import { AuthService } from '@app/routers/auth/auth.service';
+import { AuthService } from '@app/shared/auth';
 import { RedisService } from '@app/shared/redis';
 import { formatAuthorization } from '@app/helpers/utils.helper';
 import { IUserLoginCache } from '@app/routers/user/user.interface';

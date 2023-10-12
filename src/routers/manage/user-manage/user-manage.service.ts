@@ -45,5 +45,7 @@ export class UserManageService {
                 await transactionalEntityManager.save(UserRole, relations);
             }
         });
+
+        // TODO:需要重新修改登录信息里的角色
     }
 }

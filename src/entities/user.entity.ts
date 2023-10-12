@@ -1,7 +1,7 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
-import { USER_STATUS } from '@app/routers/user/user.constant';
 import { TimeEntityBase } from './lib/time-entity-base';
+import { USER_STATUS } from '@app/routers/user/user.constant';
 
 @Entity()
 export class User extends TimeEntityBase {

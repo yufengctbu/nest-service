@@ -10,7 +10,7 @@ import { UserLoginDto } from './user.dto';
 import { RedisService } from '@app/shared/redis';
 import { User, UserRole } from '@app/entities';
 import { generateCode } from '@app/helpers/utils.helper';
-import { AuthService } from '@app/routers/auth/auth.service';
+import { AuthService } from '@app/shared/auth';
 import { FailException } from '@app/exceptions/fail.exception';
 import { ERROR_CODE } from '@app/constants/error-code.constant';
 import { EMAIL_VALIDITY_PERIOD } from '@app/constants/common.constant';

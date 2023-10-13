@@ -27,7 +27,7 @@ export class RoleManageService {
         if (q) handle = handle.where('role.name LIKE :query', { query: `%${q}%` });
 
         // 分页处理
-        if (page && pageSize) handle = handle.skip((page - 1) * pageSize).take(page);
+        if (page && pageSize) handle = handle.skip((page - 1) * pageSize).take(pageSize);
 
         const [roles, count] = await handle.getManyAndCount();
 

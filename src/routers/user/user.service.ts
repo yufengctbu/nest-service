@@ -235,7 +235,7 @@ export class UserService {
      * @param userId
      * @returns
      */
-    public async queryUserProfile(userId: number): Promise<IUserInfo> {
+    public async queryUserProfile(userId: number): Promise<Omit<IUserInfo, 'status'>> {
         const userProfile = await this.userRepository.findOne({
             select: ['id', 'username', 'email', 'avatar'],
             where: { id: userId },

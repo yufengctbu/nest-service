@@ -1,5 +1,11 @@
 import { Transform, Type } from 'class-transformer';
-import { IsDefined, IsInt, IsNotEmpty, IsPositive } from 'class-validator';
+
+import { PaginationDto } from '@app/dtos/pagination.dto';
+import { USER_REMOVE_MODE } from './user-manage.constant';
+import { IsDefined, IsInt, IsNotEmpty, IsOptional, IsPositive, Length } from 'class-validator';
+
+// 查询用户列表
+export class UserListDto extends PaginationDto {}
 
 // 给用户分配角色
 export class AssignUserRolesDto {
@@ -15,4 +21,17 @@ export class AssignUserRolesDto {
     @Type(() => String)
     @IsDefined()
     roles: string;
+}
+
+export class RemoveUsersDto {
+    @Length(1)
+    @Transform(({ value }) => value.trim())
+    @Type(() => String)
+    @IsNotEmpty()
+    users: string;
+
+    @IsInt()
+    @Type(() => Number)
+    @IsOptional()
+    rigid: number = USER_REMOVE_MODE.FORBID;
 }

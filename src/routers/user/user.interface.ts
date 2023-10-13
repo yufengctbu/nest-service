@@ -1,3 +1,5 @@
+import { USER_STATUS } from './user.constant';
+
 // 登录后用返回给前端的token
 export interface IUserLoginResponse {
     token: string;
@@ -19,6 +21,8 @@ export interface IUserInfo {
     email: string;
 
     avatar: string;
+
+    status: USER_STATUS;
 }
 
 // 缓存中用户的信息

@@ -2,13 +2,16 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository, In, EntityManager } from 'typeorm';
 
-import { User, Role, UserRole } from '@app/entities';
-import { ERROR_CODE } from '@app/constants/error-code.constant';
-import { FailException } from '@app/exceptions/fail.exception';
-import { userLoginCachePrefix } from '@app/routers/user/user.helper';
-import { RedisService } from '@app/shared/redis';
-import { IUserLoginCache } from '@app/routers/user/user.interface';
+import { UserListDto } from './user-manage.dto';
 import { ConfigService } from '@nestjs/config';
+import { RedisService } from '@app/shared/redis';
+import { User, Role, UserRole } from '@app/entities';
+import { USER_REMOVE_MODE } from './user-manage.constant';
+import { IUserListResponse } from './user-manage.interface';
+import { FailException } from '@app/exceptions/fail.exception';
+import { ERROR_CODE } from '@app/constants/error-code.constant';
+import { IUserLoginCache } from '@app/routers/user/user.interface';
+import { userLoginCachePrefix } from '@app/routers/user/user.helper';
 
 @Injectable()
 export class UserManageService {
@@ -18,6 +21,33 @@ export class UserManageService {
         private readonly configService: ConfigService,
         @InjectRepository(User) private readonly userRepository: Repository<User>,
     ) {}
+
+    /**
+     * 查询用户列表
+     * @param userListParam
+     */
+    public async queryUserList(userListParam: UserListDto): Promise<IUserListResponse> {
+        const { page, pageSize, q } = userListParam;
+
+        let handle = this.userRepository
+            .createQueryBuilder('user')
+            .select(['user.id', 'user.username', 'user.email', 'user.avatar', 'user.status']);
+
+        if (page && pageSize) handle = handle.skip((page - 1) * pageSize).take(pageSize);
+
+        if (q) handle = handle.where('user.username LIKE :query', { query: `%${q}%` });
+
+        const [users, count] = await handle.getManyAndCount();
+
+        return {
+            count,
+            users,
+            pagination: {
+                page: page ?? 1,
+                pageSize: pageSize ?? count,
+            },
+        };
+    }
 
     /**
      * 给用户分配角色
@@ -62,4 +92,11 @@ export class UserManageService {
             await this.redisService.set(userStoreHandle, userInfo, expireTime);
         }
     }
+
+    /**
+     * 删除用户
+     * @param userIds
+     * @param rigid
+     */
+    public async removeUsers(userIds: string, rigid: USER_REMOVE_MODE): Promise<void> {}
 }

@@ -6,7 +6,6 @@ import { UserListDto } from './user-manage.dto';
 import { ConfigService } from '@nestjs/config';
 import { RedisService } from '@app/shared/redis';
 import { User, Role, UserRole } from '@app/entities';
-import { USER_REMOVE_MODE } from './user-manage.constant';
 import { IUserListResponse } from './user-manage.interface';
 import { USER_STATUS } from '@app/routers/user/user.constant';
 import { FailException } from '@app/exceptions/fail.exception';
@@ -98,12 +97,42 @@ export class UserManageService {
     }
 
     /**
+     * 调整用户状态
+     * @param currentUser
+     * @param userIds
+     * @param status
+     */
+    public async setUserStatus(currentUser: number, userIds: string, status: USER_STATUS): Promise<void> {
+        const idList = userIds.split(',').map((item) => Number(item));
+
+        const userList = await this.userRepository.find({ where: { id: In(idList) } });
+
+        if (userList.length < 1) throw new FailException(ERROR_CODE.USER.USER_NOT_EXISTS);
+
+        // 用户不能自己设置自己的状态
+        if (userList.find((item) => item.id === currentUser)) throw new FailException(ERROR_CODE.COMMON.RESTRICTED_PERMISSIONS);
+
+        userList.map((item) => {
+            item.status = status;
+            return item;
+        });
+
+        await this.userRepository.save(userList);
+
+        // 如果是执行禁止操作，那么就需要把用户退出
+        if (status === USER_STATUS.FORBID) {
+            const handleList = userList.map((item) => userLoginCachePrefix(item.id, item.email));
+
+            await this.redisService.delete(handleList);
+        }
+    }
+
+    /**
      * 删除用户
      * @param currentUser
      * @param userIds
-     * @param rigid
      */
-    public async removeUsers(currentUser: number, userIds: string, rigid: USER_REMOVE_MODE): Promise<void> {
+    public async removeUsers(currentUser: number, userIds: string): Promise<void> {
         const idList = userIds.split(',').map((item) => Number(item));
 
         const userList = await this.userRepository.find({ where: { id: In(idList) } });
@@ -113,28 +142,6 @@ export class UserManageService {
         // 用户不能自己删除自己
         if (userList.find((item) => item.id === currentUser)) throw new FailException(ERROR_CODE.COMMON.RESTRICTED_PERMISSIONS);
 
-        if (rigid === USER_REMOVE_MODE.DELETE) {
-            // 从数据库中删除用户
-            await this.removeUsersFromDatabase(userList);
-        } else {
-            userList.map((item) => {
-                item.status = USER_STATUS.FORBID;
-                return item;
-            });
-
-            await this.userRepository.save(userList);
-
-            const handleList = userList.map((item) => userLoginCachePrefix(item.id, item.email));
-            // 已登录的用户需要退出
-            await this.redisService.delete(handleList);
-        }
-    }
-
-    /**
-     * 从数据库中删除用户记录
-     * @param userList
-     */
-    private async removeUsersFromDatabase(userList: Array<User>): Promise<void> {
         const userIdList = userList.map((item) => item.id);
 
         // 从数据库中删除相关的数据记录

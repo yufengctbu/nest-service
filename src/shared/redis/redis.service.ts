@@ -61,7 +61,9 @@ export class RedisService {
      * @param keys
      * @returns
      */
-    public async delete(...keys: string[]): Promise<boolean> {
+    public async delete(keys: string | string[]): Promise<boolean> {
+        if (!Array.isArray(keys)) keys = [keys];
+
         const result = await this.redisInstance.del(...keys);
 
         return Boolean(result);

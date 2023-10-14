@@ -23,6 +23,32 @@
 $ yarn install
 ```
 
+## 配置
+
+-   该项目支持配置开发与生产配置,配置文件应放在项目的根目录 (项目配置放在`configs`目录下)
+-   开发环境需要配置`.env.development`文件下，生产环境需要配置到根目录的`.env.production`文件
+    示例配置：
+
+```bash
+APP_PORT=3000
+
+# mysql数据库信息
+MYSQL_HOST=***
+MYSQL_DATABASE=***
+MYSQL_PASSWORD=***
+
+# redis数据库信息
+REDIS_HOST=***
+REDIS_PASSWORD=***
+
+# emailer的配置信息
+EMAIL_HOST=***
+EMAIL_SOURCE_EMAIL=***@163.com
+EMAIL_AUTH_CODE=***
+```
+
+> 更多配置祥见configs目录中的配置
+
 ## 运行
 
 ```bash

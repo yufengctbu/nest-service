@@ -2,6 +2,7 @@ enum COMMON {
     PARAM_ERROR = 900101, //参数错误
     RECORD_EXITS = 900102, // 记录已存在
     RECORD_NOT_EXISTS = 900103, // 记录不存在
+    RESTRICTED_PERMISSIONS = 900104, //权限受限
 }
 
 // 服务器错误

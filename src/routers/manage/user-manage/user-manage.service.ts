@@ -12,6 +12,7 @@ import { FailException } from '@app/exceptions/fail.exception';
 import { ERROR_CODE } from '@app/constants/error-code.constant';
 import { IUserLoginCache } from '@app/routers/user/user.interface';
 import { userLoginCachePrefix } from '@app/routers/user/user.helper';
+import { USER_STATUS } from '@app/routers/user/user.constant';
 
 @Injectable()
 export class UserManageService {
@@ -51,10 +52,13 @@ export class UserManageService {
 
     /**
      * 给用户分配角色
+     * @param currentUser
      * @param uid
      * @param roles
      */
-    public async distributeUserRoles(uid: number, roles: string = ''): Promise<void> {
+    public async distributeUserRoles(currentUser: number, uid: number, roles: string = ''): Promise<void> {
+        // 排除自己给自己授角的情况
+        if (currentUser === uid) throw new FailException(ERROR_CODE.COMMON.RESTRICTED_PERMISSIONS);
         const targetUser = await this.userRepository.findOne({
             select: ['id', 'email'],
             where: { id: uid },
@@ -95,8 +99,35 @@ export class UserManageService {
 
     /**
      * 删除用户
+     * @param currentUser
      * @param userIds
      * @param rigid
      */
-    public async removeUsers(userIds: string, rigid: USER_REMOVE_MODE): Promise<void> {}
+    public async removeUsers(currentUser: number, userIds: string, rigid: USER_REMOVE_MODE): Promise<void> {
+        const idList = userIds.split(',').map((item) => Number(item));
+
+        const userList = await this.userRepository.find({ where: { id: In(idList) } });
+
+        if (userList.length < 1) throw new FailException(ERROR_CODE.USER.USER_NOT_EXISTS);
+
+        // 用户不能自己删除自己
+        if (userList.find((item) => item.id === currentUser)) throw new FailException(ERROR_CODE.COMMON.RESTRICTED_PERMISSIONS);
+
+        if (rigid === USER_REMOVE_MODE.FORBID) {
+            userList.map((item) => {
+                item.status = USER_STATUS.FORBID;
+                return item;
+            });
+
+            await this.userRepository.save(userList);
+
+            const handleList = userList.map((item) => userLoginCachePrefix(item.id, item.email));
+            // 已登录的用户需要退出
+            await this.redisService.delete(handleList);
+        } else {
+            console.log('remove user');
+        }
+
+        console.log(userList);
+    }
 }

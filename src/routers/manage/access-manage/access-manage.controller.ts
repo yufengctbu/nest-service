@@ -1,4 +1,7 @@
 import { Controller } from '@nestjs/common';
 
 @Controller('access-manage')
-export class AccessManageController {}
+export class AccessManageController {
+    // @Get()
+    // public getAccessCategory
+}

@@ -8,11 +8,11 @@ import { RedisService } from '@app/shared/redis';
 import { User, Role, UserRole } from '@app/entities';
 import { USER_REMOVE_MODE } from './user-manage.constant';
 import { IUserListResponse } from './user-manage.interface';
+import { USER_STATUS } from '@app/routers/user/user.constant';
 import { FailException } from '@app/exceptions/fail.exception';
 import { ERROR_CODE } from '@app/constants/error-code.constant';
 import { IUserLoginCache } from '@app/routers/user/user.interface';
 import { userLoginCachePrefix } from '@app/routers/user/user.helper';
-import { USER_STATUS } from '@app/routers/user/user.constant';
 
 @Injectable()
 export class UserManageService {
@@ -113,7 +113,10 @@ export class UserManageService {
         // 用户不能自己删除自己
         if (userList.find((item) => item.id === currentUser)) throw new FailException(ERROR_CODE.COMMON.RESTRICTED_PERMISSIONS);
 
-        if (rigid === USER_REMOVE_MODE.FORBID) {
+        if (rigid === USER_REMOVE_MODE.DELETE) {
+            // 从数据库中删除用户
+            await this.removeUsersFromDatabase(userList);
+        } else {
             userList.map((item) => {
                 item.status = USER_STATUS.FORBID;
                 return item;
@@ -124,10 +127,25 @@ export class UserManageService {
             const handleList = userList.map((item) => userLoginCachePrefix(item.id, item.email));
             // 已登录的用户需要退出
             await this.redisService.delete(handleList);
-        } else {
-            console.log('remove user');
         }
+    }
 
-        console.log(userList);
+    /**
+     * 从数据库中删除用户记录
+     * @param userList
+     */
+    private async removeUsersFromDatabase(userList: Array<User>): Promise<void> {
+        const userIdList = userList.map((item) => item.id);
+
+        // 从数据库中删除相关的数据记录
+        await this.dataSource.transaction(async (transactionalEntityManager: EntityManager) => {
+            await transactionalEntityManager.delete(UserRole, { userId: In(userIdList) });
+
+            await transactionalEntityManager.delete(User, { id: In(userIdList) });
+        });
+
+        const redisStoreHandle = userList.map((item) => userLoginCachePrefix(item.id, item.email));
+
+        await this.redisService.delete(redisStoreHandle);
     }
 }

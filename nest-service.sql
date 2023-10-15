@@ -53,7 +53,7 @@ CREATE TABLE `access_category` (
     `create_at` int(11) UNSIGNED NOT NULL COMMENT 'create time',
     `update_at` int(11) UNSIGNED NOT NULL COMMENT 'update time',
     PRIMARY KEY (`id`) USING BTREE,
-    INDEX `idx_name`(`name`) USING BTREE
+    UNIQUE INDEX `uk_name`(`name`) USING BTREE
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------

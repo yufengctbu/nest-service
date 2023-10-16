@@ -24,8 +24,17 @@ enum USER {
     USER_NOT_EXISTS = 900207, // 用户不存在
 }
 
+// 权限相关的错误
+enum ACCESS {
+    ACCESS_CATEGORY_EXISTS = 900301, // 权限类别不存在
+    ACCESS_CATEGORY_NOT_EXISTS = 900302, // 权限类别不存在
+    ACCESS_EXISTS = 900303, // 当前权限已存在
+    ACCESS_NOT_EXISTS = 900304, // 当前权限不存在
+}
+
 export const ERROR_CODE = {
     COMMON,
     SERVICE,
     USER,
+    ACCESS,
 };

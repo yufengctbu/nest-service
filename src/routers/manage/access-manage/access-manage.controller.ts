@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Query, Body, Put } from '@nestjs/common';
 
 import { AccessManageService } from './access-manage.service';
-import { AccessCategoryListDto, CreateAccessCategoryDto, ModifyAccessCategoryDto } from './access-manage.dto';
+import { AccessCategoryListDto, CreateAccessCategoryDto, CreateAccessDto, ModifyAccessCategoryDto } from './access-manage.dto';
 
 @Controller('access-manage')
 export class AccessManageController {
@@ -27,5 +27,11 @@ export class AccessManageController {
         const { id, name, desc } = categoryInfo;
 
         await this.accessManageService.modifyAccessCategory(id, name, desc);
+    }
+
+    // 创建权限
+    @Post('access')
+    public async addAccess(@Body() accessInfo: CreateAccessDto) {
+        await this.accessManageService.createAccess(accessInfo);
     }
 }

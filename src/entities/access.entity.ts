@@ -2,7 +2,7 @@ import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
 
 import { TimeEntityBase } from './lib/time-entity-base';
 import { AccessCategory } from './access-category.entity';
-import { ACCESS_TYPE, ACCESS_ACTION } from '@app/routers/manage/access-manage/access-manage.constant';
+import { ACCESS_TYPE } from '@app/routers/manage/access-manage/access-manage.constant';
 
 @Entity()
 export class Access extends TimeEntityBase {
@@ -19,7 +19,7 @@ export class Access extends TimeEntityBase {
     type: ACCESS_TYPE;
 
     @Column('varchar', { nullable: false, length: 30, comment: 'access action' })
-    action: ACCESS_ACTION;
+    action: string;
 
     @Column('varchar', { length: 200, nullable: false, comment: 'access router url' })
     routerUrl: string;

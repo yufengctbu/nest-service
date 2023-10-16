@@ -19,3 +19,5 @@ export enum ACCESS_ACTION {
 
     HEAD = 'HEAD',
 }
+
+export const ACCESS_ACTION_LIST = Object.values(ACCESS_ACTION);

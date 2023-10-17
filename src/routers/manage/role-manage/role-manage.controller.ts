@@ -1,7 +1,7 @@
 import { RoleManageService } from './role-manage.service';
-import { Controller, Get, Post, Put, Query, Body } from '@nestjs/common';
+import { Controller, Get, Post, Put, Query, Body, Delete } from '@nestjs/common';
 
-import { RoleListDto, CreateRoleDto, ModifyRoleDto } from './role-manage.dto';
+import { RoleListDto, CreateRoleDto, ModifyRoleDto, AccessRoleAccessDto, DeleteRoleDto } from './role-manage.dto';
 
 @Controller('role-manage')
 export class RoleManageController {
@@ -10,6 +10,14 @@ export class RoleManageController {
     @Get('list')
     public async roleList(@Query() queryInfo: RoleListDto) {
         return this.roleManageService.queryRoleList(queryInfo);
+    }
+
+    // 给角色分配权限
+    @Post('assign-access')
+    public async assignRoleAccess(@Body() assignRoleAccessInfo: AccessRoleAccessDto) {
+        const { role, access } = assignRoleAccessInfo;
+
+        await this.roleManageService.assignRoleAccessInfo(role, access);
     }
 
     // 添加角色
@@ -28,5 +36,11 @@ export class RoleManageController {
         await this.roleManageService.modifyRole(id, name, desc);
     }
 
-    // TODO:删除角色
+    // 删除角色
+    @Delete()
+    public async deleteRole(@Body() rolesInfo: DeleteRoleDto) {
+        const { roles } = rolesInfo;
+
+        await this.roleManageService.deleteRole(roles);
+    }
 }

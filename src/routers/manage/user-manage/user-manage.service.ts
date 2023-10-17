@@ -67,20 +67,21 @@ export class UserManageService {
 
         const roleList = await this.dataSource.getRepository(Role).findBy({ id: In(rolesId) });
 
+        // 如果角色的长度为0则返回错误信息
+        if (roleList.length < 1) throw new FailException(ERROR_CODE.COMMON.RECORD_NOT_EXISTS);
+
         // 删除掉该用户的所有信息再进行授角
         await this.dataSource.transaction(async (transactionalEntityManager: EntityManager) => {
             await transactionalEntityManager.delete(UserRole, { userId: uid });
 
-            if (roleList.length > 0) {
-                const relations = roleList.map((item: Role) =>
-                    transactionalEntityManager.create(UserRole, {
-                        userId: uid,
-                        role: item,
-                    }),
-                );
+            const relations = roleList.map((item: Role) =>
+                transactionalEntityManager.create(UserRole, {
+                    userId: uid,
+                    role: item,
+                }),
+            );
 
-                await transactionalEntityManager.save(UserRole, relations);
-            }
+            await transactionalEntityManager.save(UserRole, relations);
         });
 
         const userStoreHandle = userLoginCachePrefix(targetUser.id, targetUser.email);

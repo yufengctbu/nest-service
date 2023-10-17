@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Query, Body, Put } from '@nestjs/common';
+import { Controller, Get, Post, Query, Body, Put, Delete } from '@nestjs/common';
 
 import { AccessManageService } from './access-manage.service';
 import {
@@ -7,6 +7,7 @@ import {
     AccessCategoryListDto,
     CreateAccessCategoryDto,
     ModifyAccessCategoryDto,
+    DeleteAccessDto,
 } from './access-manage.dto';
 
 @Controller('access-manage')
@@ -45,5 +46,13 @@ export class AccessManageController {
     @Put('access')
     public async modifyAccess(@Body() accessInfo: ModifyAccessDto) {
         await this.accessManageService.modifyAccess(accessInfo);
+    }
+
+    // 删除权限
+    @Delete('access')
+    public async deleteAccess(@Body() deleteAccessInfo: DeleteAccessDto) {
+        const { access } = deleteAccessInfo;
+
+        await this.accessManageService.deleteAccess(access);
     }
 }

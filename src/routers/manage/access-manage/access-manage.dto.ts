@@ -77,3 +77,11 @@ export class CreateAccessDto extends OmitType(AccessDto, ['id']) {}
 
 // 修改权限
 export class ModifyAccessDto extends OmitType(AccessDto, ['category']) {}
+
+// 删除权限
+export class DeleteAccessDto {
+    @Length(1)
+    @Transform(({ value }) => value.toString().trim())
+    @IsNotEmpty()
+    access: string;
+}

@@ -24,3 +24,24 @@ export class ModifyRoleDto extends CreateRoleDto {
     @IsNotEmpty()
     id: number;
 }
+
+// 给角色分配权限
+export class AccessRoleAccessDto {
+    @IsPositive()
+    @IsInt()
+    @Type(() => Number)
+    @IsNotEmpty()
+    role: number;
+
+    @Length(1)
+    @Transform(({ value }) => value.toString().trim())
+    @IsNotEmpty()
+    access: string;
+}
+
+export class DeleteRoleDto {
+    @Length(1)
+    @Transform(({ value }) => value.toString().trim())
+    @IsNotEmpty()
+    roles: string;
+}

@@ -1,17 +1,19 @@
-import { Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-
-import { Role } from '@app/entities';
+import { Repository, DataSource, EntityManager, In } from 'typeorm';
 
 import { RoleListDto } from './role-manage.dto';
+import { Access, Role, RoleAccess, UserRole } from '@app/entities';
 import { IRoleListResponse } from './role-manage.interface';
 import { FailException } from '@app/exceptions/fail.exception';
 import { ERROR_CODE } from '@app/constants/error-code.constant';
 
 @Injectable()
 export class RoleManageService {
-    public constructor(@InjectRepository(Role) private readonly roleRepository: Repository<Role>) {}
+    public constructor(
+        private dataSource: DataSource,
+        @InjectRepository(Role) private readonly roleRepository: Repository<Role>,
+    ) {}
 
     /**
      * 请求角色列表
@@ -63,6 +65,31 @@ export class RoleManageService {
     }
 
     /**
+     * 给角色分配权限
+     * @param roleId
+     * @param access
+     */
+    public async assignRoleAccessInfo(roleId: number, access: string): Promise<void> {
+        const targetRole = await this.roleRepository.findOneBy({ id: roleId });
+        if (!targetRole) throw new FailException(ERROR_CODE.COMMON.RECORD_NOT_EXISTS);
+
+        const list = access.split(',').map((item) => Number(item));
+
+        const accessList = await this.dataSource.getRepository(Access).find({ where: { id: In(list) } });
+        if (accessList.length < 1) throw new FailException(ERROR_CODE.ACCESS.ACCESS_NOT_EXISTS);
+
+        await this.dataSource.transaction(async (transactionalEntityManager: EntityManager) => {
+            await transactionalEntityManager.delete(RoleAccess, { roleId });
+
+            const relations = accessList.map((item) => {
+                return transactionalEntityManager.create(RoleAccess, { roleId, access: item });
+            });
+
+            await transactionalEntityManager.save(RoleAccess, relations);
+        });
+    }
+
+    /**
      * 修改角色信息
      * @param id
      * @param name
@@ -78,5 +105,29 @@ export class RoleManageService {
         targetRole.description = description;
 
         await this.roleRepository.save(targetRole);
+    }
+
+    /**
+     * 删除角色
+     * @param roles
+     */
+    public async deleteRole(roles: string): Promise<void> {
+        const list = roles.split(',').map((item) => Number(item));
+
+        const roleList = await this.roleRepository.findBy({ id: In(list) });
+
+        if (roleList.length < 1) throw new FailException(ERROR_CODE.COMMON.RECORD_NOT_EXISTS);
+        const roleIdList = roleList.map((item) => item.id);
+
+        // 删除与role有关的表的记录
+        await this.dataSource.transaction(async (transactionalEntityManager: EntityManager) => {
+            await transactionalEntityManager.delete(Role, { id: In(roleIdList) });
+
+            await transactionalEntityManager.delete(RoleAccess, { roleId: In(roleIdList) });
+
+            await transactionalEntityManager.delete(UserRole, { role: In(roleIdList) });
+        });
+
+        // TODO:需要删除内存中的相关数据
     }
 }

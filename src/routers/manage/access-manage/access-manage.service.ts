@@ -147,4 +147,10 @@ export class AccessManageService {
 
         await this.accessRepository.save(targetAccess);
     }
+
+    /**
+     * 删除权限
+     * @param accessIds
+     */
+    public async deleteAccess(accessIds: string): Promise<void> {}
 }

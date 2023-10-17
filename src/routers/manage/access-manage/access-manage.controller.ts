@@ -1,7 +1,13 @@
 import { Controller, Get, Post, Query, Body, Put } from '@nestjs/common';
 
 import { AccessManageService } from './access-manage.service';
-import { AccessCategoryListDto, CreateAccessCategoryDto, CreateAccessDto, ModifyAccessCategoryDto } from './access-manage.dto';
+import {
+    CreateAccessDto,
+    ModifyAccessDto,
+    AccessCategoryListDto,
+    CreateAccessCategoryDto,
+    ModifyAccessCategoryDto,
+} from './access-manage.dto';
 
 @Controller('access-manage')
 export class AccessManageController {
@@ -33,5 +39,11 @@ export class AccessManageController {
     @Post('access')
     public async addAccess(@Body() accessInfo: CreateAccessDto) {
         await this.accessManageService.createAccess(accessInfo);
+    }
+
+    // 修改权限
+    @Put('access')
+    public async modifyAccess(@Body() accessInfo: ModifyAccessDto) {
+        await this.accessManageService.modifyAccess(accessInfo);
     }
 }

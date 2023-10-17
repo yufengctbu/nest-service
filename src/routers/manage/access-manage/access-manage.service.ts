@@ -6,7 +6,7 @@ import { Access, AccessCategory } from '@app/entities';
 import { FailException } from '@app/exceptions/fail.exception';
 import { ERROR_CODE } from '@app/constants/error-code.constant';
 import { IAccessCategoryResponse } from './access-manage.interface';
-import { AccessCategoryListDto, CreateAccessDto } from './access-manage.dto';
+import { AccessCategoryListDto, CreateAccessDto, ModifyAccessDto } from './access-manage.dto';
 
 @Injectable()
 export class AccessManageService {
@@ -97,7 +97,7 @@ export class AccessManageService {
 
         const targetAccess = await this.accessRepository
             .createQueryBuilder('access')
-            .select(['id'])
+            .select(['access.id'])
             .where('access.type=:type AND access.action=:action AND access.routerUrl=:router', { type, action, router })
             .getOne();
 
@@ -113,5 +113,38 @@ export class AccessManageService {
         });
 
         await this.accessRepository.save(createAccessInfo);
+    }
+
+    /**
+     * 修改权限
+     * @param accessInfo
+     */
+    public async modifyAccess(accessInfo: ModifyAccessDto): Promise<void> {
+        const { id, type, action, router, name, desc = '' } = accessInfo;
+
+        const targetAccess = await this.accessRepository.findOneBy({ id });
+
+        if (!targetAccess) throw new FailException(ERROR_CODE.ACCESS.ACCESS_NOT_EXISTS);
+
+        const existsRecord = await this.accessRepository
+            .createQueryBuilder('access')
+            .select(['access.id'])
+            .where('access.type=:type AND access.action=:action AND access.routerUrl=:router AND access.id!=:id', {
+                type,
+                action,
+                router,
+                id,
+            })
+            .getOne();
+
+        if (existsRecord) throw new FailException(ERROR_CODE.COMMON.RECORD_EXITS);
+
+        targetAccess.name = name;
+        targetAccess.type = type;
+        targetAccess.action = action;
+        targetAccess.routerUrl = router;
+        targetAccess.description = desc;
+
+        await this.accessRepository.save(targetAccess);
     }
 }

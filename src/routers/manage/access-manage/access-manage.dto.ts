@@ -74,3 +74,6 @@ export class AccessDto {
 
 // 创建权限
 export class CreateAccessDto extends OmitType(AccessDto, ['id']) {}
+
+// 修改权限
+export class ModifyAccessDto extends OmitType(AccessDto, ['category']) {}

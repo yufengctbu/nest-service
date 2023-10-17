@@ -3,7 +3,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository, In, EntityManager } from 'typeorm';
 
 import { UserListDto } from './user-manage.dto';
-import { ConfigService } from '@nestjs/config';
 import { RedisService } from '@app/shared/redis';
 import { User, Role, UserRole } from '@app/entities';
 import { IUserListResponse } from './user-manage.interface';
@@ -18,7 +17,6 @@ export class UserManageService {
     public constructor(
         private readonly dataSource: DataSource,
         private readonly redisService: RedisService,
-        private readonly configService: ConfigService,
         @InjectRepository(User) private readonly userRepository: Repository<User>,
     ) {}
 
@@ -87,10 +85,9 @@ export class UserManageService {
 
         const userStoreHandle = userLoginCachePrefix(targetUser.id, targetUser.email);
         const userInfo = await this.redisService.get<IUserLoginCache>(userStoreHandle);
-        // 如果不配置，那么则不设置过期时间
-        const expireTime = this.configService.get<number>('app.loginExpiresIn');
-
         if (userInfo) {
+            const expireTime = await this.redisService.ttl(userStoreHandle);
+
             userInfo.roleIds = roleList.map((item) => item.id);
             await this.redisService.set(userStoreHandle, userInfo, expireTime);
         }

@@ -8,6 +8,14 @@ export class RedisService {
     public constructor(@Inject(REDIS_CONFIG_PROVIDER) private readonly redisInstance: Redis) {}
 
     /**
+     * 返回指定key的过期时间，如果是-2表示key不存在
+     * @param key
+     */
+    public ttl(key: string): Promise<number> {
+        return this.redisInstance.ttl(key);
+    }
+
+    /**
      * 判断当前的key是否存在
      * @param key
      * @returns

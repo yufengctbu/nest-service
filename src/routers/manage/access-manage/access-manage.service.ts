@@ -3,10 +3,10 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { Access, AccessCategory } from '@app/entities';
-import { AccessCategoryListDto, CreateAccessDto } from './access-manage.dto';
 import { FailException } from '@app/exceptions/fail.exception';
 import { ERROR_CODE } from '@app/constants/error-code.constant';
-import { ACCESS_ACTION } from './access-manage.constant';
+import { IAccessCategoryResponse } from './access-manage.interface';
+import { AccessCategoryListDto, CreateAccessDto } from './access-manage.dto';
 
 @Injectable()
 export class AccessManageService {
@@ -15,8 +15,38 @@ export class AccessManageService {
         @InjectRepository(AccessCategory) private readonly accessCategoryRepository: Repository<AccessCategory>,
     ) {}
 
-    public async queryAccessCategoryList(accessCategoryListInfo: AccessCategoryListDto) {
-        console.log(accessCategoryListInfo);
+    public async queryAccessCategoryList(accessCategoryListInfo: AccessCategoryListDto): Promise<IAccessCategoryResponse> {
+        const { page, pageSize, q } = accessCategoryListInfo;
+
+        let handle = this.accessCategoryRepository
+            .createQueryBuilder('category')
+            .select([
+                'category.id',
+                'category.name',
+                'category.description',
+                'access.id',
+                'access.name',
+                'access.type',
+                'access.action',
+                'access.routerUrl',
+                'access.description',
+            ])
+            .leftJoin('category.access', 'access');
+
+        if (page && pageSize) handle = handle.skip((page - 1) * pageSize).take(pageSize);
+
+        if (q) handle = handle.where('category.name LIKE :query', { query: `%${q}%` });
+
+        const [list, count] = await handle.getManyAndCount();
+
+        return {
+            count,
+            list,
+            pagination: {
+                page: page ?? 1,
+                pageSize: pageSize ?? count,
+            },
+        };
     }
 
     /**

@@ -33,6 +33,14 @@ export class CreateAccessCategoryDto extends OmitType(AccessCategoryDto, ['id'])
 // 修改accessCategory
 export class ModifyAccessCategoryDto extends AccessCategoryDto {}
 
+// 删除accessCategory
+export class DeleteAccessCategoryDto {
+    @Length(1)
+    @Transform(({ value }) => value.toString().trim())
+    @IsNotEmpty()
+    category: string;
+}
+
 export class AccessDto {
     @IsPositive()
     @IsInt()

@@ -1,16 +1,17 @@
-import { Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { DataSource, In, Repository, EntityManager } from 'typeorm';
 
-import { Access, AccessCategory } from '@app/entities';
 import { FailException } from '@app/exceptions/fail.exception';
 import { ERROR_CODE } from '@app/constants/error-code.constant';
+import { Access, AccessCategory, RoleAccess } from '@app/entities';
 import { IAccessCategoryResponse } from './access-manage.interface';
 import { AccessCategoryListDto, CreateAccessDto, ModifyAccessDto } from './access-manage.dto';
 
 @Injectable()
 export class AccessManageService {
     public constructor(
+        private dataSource: DataSource,
         @InjectRepository(Access) private readonly accessRepository: Repository<Access>,
         @InjectRepository(AccessCategory) private readonly accessCategoryRepository: Repository<AccessCategory>,
     ) {}
@@ -86,6 +87,12 @@ export class AccessManageService {
     }
 
     /**
+     * 删除accessCategory
+     * @param category
+     */
+    public async deleteAccessCategory(category: string): Promise<void> {}
+
+    /**
      * 创建权限
      * @param accessInfo
      */
@@ -152,5 +159,20 @@ export class AccessManageService {
      * 删除权限
      * @param accessIds
      */
-    public async deleteAccess(accessIds: string): Promise<void> {}
+    public async deleteAccess(accessIds: string): Promise<void> {
+        const list = accessIds.split(',').map((item) => Number(item));
+
+        const accessList = await this.accessRepository.findBy({ id: In(list) });
+
+        if (accessList.length < 1) throw new FailException(ERROR_CODE.COMMON.RECORD_NOT_EXISTS);
+        const accessIdList = accessList.map((item) => item.id);
+
+        await this.dataSource.transaction(async (transactionalEntityManager: EntityManager) => {
+            await transactionalEntityManager.delete(Access, { id: In(accessIdList) });
+
+            await transactionalEntityManager.delete(RoleAccess, { access: In(accessIdList) });
+        });
+
+        // TODO: 需要删除内存中的数据
+    }
 }

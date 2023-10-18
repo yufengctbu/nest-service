@@ -4,10 +4,11 @@ import { AccessManageService } from './access-manage.service';
 import {
     CreateAccessDto,
     ModifyAccessDto,
+    DeleteAccessDto,
     AccessCategoryListDto,
     CreateAccessCategoryDto,
     ModifyAccessCategoryDto,
-    DeleteAccessDto,
+    DeleteAccessCategoryDto,
 } from './access-manage.dto';
 
 @Controller('access-manage')
@@ -34,6 +35,14 @@ export class AccessManageController {
         const { id, name, desc } = categoryInfo;
 
         await this.accessManageService.modifyAccessCategory(id, name, desc);
+    }
+
+    // 删除权限类别
+    @Delete('access-category')
+    public async deleteAccessCategory(@Body() categoryInfo: DeleteAccessCategoryDto) {
+        const { category } = categoryInfo;
+
+        await this.accessManageService.deleteAccessCategory(category);
     }
 
     // 创建权限

@@ -90,7 +90,36 @@ export class AccessManageService {
      * 删除accessCategory
      * @param category
      */
-    public async deleteAccessCategory(category: string): Promise<void> {}
+    public async deleteAccessCategory(category: string): Promise<void> {
+        const list = category.split(',').map((item) => Number(item));
+
+        const categoryList = await this.accessCategoryRepository.findBy({ id: In(list) });
+
+        if (categoryList.length < 1) throw new FailException(ERROR_CODE.ACCESS.ACCESS_CATEGORY_NOT_EXISTS);
+
+        const categoryIdList = categoryList.map((item) => item.id);
+
+        await this.dataSource.transaction(async (transactionalEntityManager: EntityManager) => {
+            const accessList = await transactionalEntityManager
+                .createQueryBuilder()
+                .select(['access.id'])
+                .from(Access, 'access')
+                .where('access.accessCategory IN (:...categoryIdList)', { categoryIdList })
+                .getMany();
+
+            if (accessList.length > 0) {
+                const accessIdList = accessList.map((item) => item.id);
+
+                await transactionalEntityManager.delete(Access, { id: In(accessIdList) });
+
+                await transactionalEntityManager.delete(RoleAccess, { access: In(accessIdList) });
+            }
+
+            await transactionalEntityManager.delete(AccessCategory, { id: In(categoryIdList) });
+        });
+
+        // TODO:需要操作权限中的类别
+    }
 
     /**
      * 创建权限

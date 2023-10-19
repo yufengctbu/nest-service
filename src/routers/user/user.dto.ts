@@ -1,6 +1,6 @@
 import { Transform, Type } from 'class-transformer';
 import { OmitType, PickType } from '@nestjs/mapped-types';
-import { IsEmail, IsIn, IsInt, IsNotEmpty, IsOptional, IsPositive, IsString, IsUUID, Length, Matches } from 'class-validator';
+import { IsEmail, IsIn, IsInt, IsNotEmpty, IsOptional, IsPositive, IsString, Length, Matches } from 'class-validator';
 
 import {
     USER_CAPTCHA_BACKGROUND,
@@ -53,8 +53,7 @@ export class ModifyUserPwdDto extends RegisterUserDto {}
 
 // 用户登录
 export class UserLoginDto extends PickType(UserDto, ['email', 'password'] as const) {
-    @IsUUID()
-    @IsString()
+    @Transform(({ value }) => value.toString().trim())
     @IsNotEmpty()
     hashId: string;
 
@@ -66,6 +65,10 @@ export class UserLoginDto extends PickType(UserDto, ['email', 'password'] as con
 
 // 验证码的配置
 export class CaptchaInfoDto {
+    @Transform(({ value }) => value.toString().trim())
+    @IsOptional()
+    hashId: string = '';
+
     // 图片的宽度
     @IsPositive()
     @IsInt()

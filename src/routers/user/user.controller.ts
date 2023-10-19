@@ -41,9 +41,9 @@ export class UserController {
     @UsePublicInterface()
     @Get('captcha')
     public loginCaptcha(@Query() captchaInfo: CaptchaInfoDto) {
-        const { w, h, s, fs, bg } = captchaInfo;
+        const { hashId, w, h, s, fs, bg } = captchaInfo;
 
-        return this.userService.createCaptcha(w, h, s, fs, bg);
+        return this.userService.createCaptcha(hashId, w, h, s, fs, bg);
     }
 
     // 用户登录接口

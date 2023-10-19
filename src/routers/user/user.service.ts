@@ -1,4 +1,4 @@
-import { v4 } from 'uuid';
+import { nanoid } from 'nanoid';
 import * as bcrypt from 'bcrypt';
 import * as svgCaptcha from 'svg-captcha';
 import { Injectable } from '@nestjs/common';
@@ -116,6 +116,7 @@ export class UserService {
 
     /**
      * 创建验证码
+     * @param hash 刷新时需要把原来的hash传过来
      * @param width
      * @param height
      * @param size
@@ -124,6 +125,7 @@ export class UserService {
      * @returns
      */
     public async createCaptcha(
+        hash: string,
         width: number,
         height: number,
         size: number,
@@ -138,7 +140,7 @@ export class UserService {
             background,
         });
 
-        const captchaId = v4();
+        const captchaId = hash || nanoid();
 
         await this.redisService.set(userLoginCaptchaPrefix(captchaId), text.toLocaleLowerCase(), USER_CAPTCHA_EXPIRE);
 

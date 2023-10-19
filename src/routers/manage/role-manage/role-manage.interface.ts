@@ -13,3 +13,10 @@ export interface IRoleItemInfo {
 export interface IRoleListResponse extends IPagination {
     roles: Array<IRoleItemInfo>;
 }
+
+export interface IRoleAccessInfo {
+    action: string;
+    routerUrl: string;
+}
+
+export type IRoleAccessMap = Record<string | number, IRoleAccessInfo[]>;

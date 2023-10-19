@@ -3,15 +3,18 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource, EntityManager, In } from 'typeorm';
 
 import { RoleListDto } from './role-manage.dto';
-import { Access, Role, RoleAccess, UserRole } from '@app/entities';
-import { IRoleListResponse } from './role-manage.interface';
+import { RedisService } from '@app/shared/redis';
 import { FailException } from '@app/exceptions/fail.exception';
 import { ERROR_CODE } from '@app/constants/error-code.constant';
+import { Access, Role, RoleAccess, UserRole } from '@app/entities';
+import { IRoleListResponse, IRoleAccessMap } from './role-manage.interface';
+import { AUTH_ROLE_ACCESS_RELATION_MAP, AUTH_ROLE_ACCESS_EXPIRE } from './role-manage.constant';
 
 @Injectable()
 export class RoleManageService {
     public constructor(
         private dataSource: DataSource,
+        private redisService: RedisService,
         @InjectRepository(Role) private readonly roleRepository: Repository<Role>,
     ) {}
 
@@ -41,6 +44,36 @@ export class RoleManageService {
                 pageSize: pageSize ?? count,
             },
         };
+    }
+
+    /**
+     * 查询角色与权限的关系，验证用户登录权限
+     * @returns
+     */
+    public async queryRoleAccess(): Promise<IRoleAccessMap> {
+        const relationMap = await this.redisService.get<IRoleAccessMap>(AUTH_ROLE_ACCESS_RELATION_MAP);
+        if (relationMap) return relationMap;
+
+        const result = await this.dataSource
+            .createQueryBuilder()
+            .select(['roleAccess.roleId', 'access.routerUrl', 'access.action'])
+            .from(RoleAccess, 'roleAccess')
+            .leftJoin('roleAccess.access', 'access')
+            .getMany();
+
+        const relation = result.reduce((total: IRoleAccessMap, per: RoleAccess) => {
+            total[per.roleId] = total[per.roleId] || [];
+
+            total[per.roleId].push({
+                action: per.access.action,
+                routerUrl: per.access.routerUrl,
+            });
+            return total;
+        }, {});
+
+        await this.redisService.set(AUTH_ROLE_ACCESS_RELATION_MAP, relation, AUTH_ROLE_ACCESS_EXPIRE);
+
+        return relation;
     }
 
     /**

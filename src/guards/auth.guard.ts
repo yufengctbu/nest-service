@@ -10,17 +10,20 @@ import { formatAuthorization } from '@app/helpers/utils.helper';
 import { IUserLoginCache } from '@app/routers/user/user.interface';
 import { userLoginCachePrefix } from '@app/routers/user/user.helper';
 import { IsPublicInterface } from '@app/helpers/reflector-validate.helper';
+import { RoleManageService } from '@app/routers/manage/role-manage/role-manage.service';
 
 export class JwtAuthGuard extends AuthGuard('jwt') {
     private configService: ConfigService;
     private authService: AuthService;
     private redisService: RedisService;
+    private roleManageService: RoleManageService;
 
     public constructor(app: INestApplication) {
         super();
         this.configService = app.get(ConfigService);
         this.authService = app.get(AuthService);
         this.redisService = app.get(RedisService);
+        this.roleManageService = app.get(RoleManageService);
     }
 
     public async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -42,6 +45,9 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
         // 如果不配置，那么则不设置过期时间
         const expireTime = this.configService.get<number>('app.loginExpiresIn');
         if (expireTime) await this.redisService.expire(redisHandle, expireTime);
+
+        const roleAccessRelation = await this.roleManageService.queryRoleAccess();
+        console.log(roleAccessRelation, redisStore);
 
         return true;
     }

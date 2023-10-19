@@ -140,7 +140,7 @@ export class UserService {
             background,
         });
 
-        const captchaId = hash || nanoid();
+        const captchaId = hash && (await this.redisService.exists(userLoginCaptchaPrefix(hash))) ? hash : nanoid();
 
         await this.redisService.set(userLoginCaptchaPrefix(captchaId), text.toLocaleLowerCase(), USER_CAPTCHA_EXPIRE);
 

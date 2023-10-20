@@ -7,8 +7,9 @@ import { RedisService } from '@app/shared/redis';
 import { FailException } from '@app/exceptions/fail.exception';
 import { ERROR_CODE } from '@app/constants/error-code.constant';
 import { Access, Role, RoleAccess, UserRole } from '@app/entities';
-import { IRoleListResponse, IRoleAccessMap } from './role-manage.interface';
+import { ACCESS_TYPE } from '../access-manage/access-manage.constant';
 import { AUTH_ROLE_ACCESS_RELATION_MAP, AUTH_ROLE_ACCESS_EXPIRE } from './role-manage.constant';
+import { IRoleListResponse, IRoleAccessMap, IRoleAccessQueryItem } from './role-manage.interface';
 
 @Injectable()
 export class RoleManageService {
@@ -56,17 +57,18 @@ export class RoleManageService {
 
         const result = await this.dataSource
             .createQueryBuilder()
-            .select(['roleAccess.roleId', 'access.routerUrl', 'access.action'])
+            .select(['roleAccess.roleId AS roleId', 'access.routerUrl AS routerUrl', 'access.action AS action'])
             .from(RoleAccess, 'roleAccess')
             .leftJoin('roleAccess.access', 'access')
-            .getMany();
+            .where('access.type=:type', { type: ACCESS_TYPE.ACTION })
+            .getRawMany();
 
-        const relation = result.reduce((total: IRoleAccessMap, per: RoleAccess) => {
+        const relation = result.reduce((total: IRoleAccessMap, per: IRoleAccessQueryItem) => {
             total[per.roleId] = total[per.roleId] || [];
 
             total[per.roleId].push({
-                action: per.access.action,
-                routerUrl: per.access.routerUrl,
+                action: per.action,
+                routerUrl: per.routerUrl,
             });
             return total;
         }, {});

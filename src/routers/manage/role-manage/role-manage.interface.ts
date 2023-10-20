@@ -19,4 +19,8 @@ export interface IRoleAccessInfo {
     routerUrl: string;
 }
 
+export interface IRoleAccessQueryItem extends IRoleAccessInfo {
+    roleId: number;
+}
+
 export type IRoleAccessMap = Record<string | number, IRoleAccessInfo[]>;

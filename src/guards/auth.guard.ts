@@ -1,12 +1,13 @@
 import { Request } from 'express';
 import { AuthGuard } from '@nestjs/passport';
-import { INestApplication } from '@nestjs/common/interfaces';
 import { ConfigService } from '@nestjs/config';
+import { INestApplication } from '@nestjs/common/interfaces';
 import { ExecutionContext, UnauthorizedException } from '@nestjs/common';
 
 import { AuthService } from '@app/shared/auth';
 import { RedisService } from '@app/shared/redis';
 import { formatAuthorization } from '@app/helpers/utils.helper';
+import { validateUserRouterAuth } from '@app/helpers/guard.helper';
 import { IUserLoginCache } from '@app/routers/user/user.interface';
 import { userLoginCachePrefix } from '@app/routers/user/user.helper';
 import { IsPublicInterface } from '@app/helpers/reflector-validate.helper';
@@ -46,9 +47,10 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
         const expireTime = this.configService.get<number>('app.loginExpiresIn');
         if (expireTime) await this.redisService.expire(redisHandle, expireTime);
 
+        // 获取所有的角色权限列表
         const roleAccessRelation = await this.roleManageService.queryRoleAccess();
-        console.log(roleAccessRelation, redisStore);
 
-        return true;
+        // 角色权限验证
+        return validateUserRouterAuth(request, redisStore, roleAccessRelation);
     }
 }

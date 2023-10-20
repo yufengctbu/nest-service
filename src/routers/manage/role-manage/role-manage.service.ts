@@ -122,6 +122,14 @@ export class RoleManageService {
 
             await transactionalEntityManager.save(RoleAccess, relations);
         });
+
+        // 更新redis缓存中的关系
+        const relation = await this.redisService.get<IRoleAccessMap>(AUTH_ROLE_ACCESS_RELATION_MAP);
+        if (relation) {
+            relation[roleId] = accessList.map((item) => ({ action: item.action, routerUrl: item.routerUrl }));
+
+            await this.redisService.set(AUTH_ROLE_ACCESS_RELATION_MAP, relation, AUTH_ROLE_ACCESS_EXPIRE);
+        }
     }
 
     /**
@@ -163,6 +171,12 @@ export class RoleManageService {
             await transactionalEntityManager.delete(UserRole, { role: In(roleIdList) });
         });
 
-        // TODO:需要删除内存中的相关数据
+        // 更新redis缓存中的关系
+        const relation = await this.redisService.get<IRoleAccessMap>(AUTH_ROLE_ACCESS_RELATION_MAP);
+        if (relation) {
+            roleIdList.forEach((id) => Reflect.deleteProperty(relation, id));
+
+            await this.redisService.set(AUTH_ROLE_ACCESS_RELATION_MAP, relation, AUTH_ROLE_ACCESS_EXPIRE);
+        }
     }
 }

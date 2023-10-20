@@ -2,16 +2,19 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, In, Repository, EntityManager } from 'typeorm';
 
+import { RedisService } from '@app/shared/redis';
 import { FailException } from '@app/exceptions/fail.exception';
 import { ERROR_CODE } from '@app/constants/error-code.constant';
 import { Access, AccessCategory, RoleAccess } from '@app/entities';
 import { IAccessCategoryResponse } from './access-manage.interface';
 import { AccessCategoryListDto, CreateAccessDto, ModifyAccessDto } from './access-manage.dto';
+import { AUTH_ROLE_ACCESS_RELATION_MAP } from '@app/routers/manage/role-manage/role-manage.constant';
 
 @Injectable()
 export class AccessManageService {
     public constructor(
         private dataSource: DataSource,
+        private redisService: RedisService,
         @InjectRepository(Access) private readonly accessRepository: Repository<Access>,
         @InjectRepository(AccessCategory) private readonly accessCategoryRepository: Repository<AccessCategory>,
     ) {}
@@ -118,7 +121,8 @@ export class AccessManageService {
             await transactionalEntityManager.delete(AccessCategory, { id: In(categoryIdList) });
         });
 
-        // TODO:需要操作权限中的类别
+        // 删除权限缓存
+        await this.redisService.delete(AUTH_ROLE_ACCESS_RELATION_MAP);
     }
 
     /**
@@ -202,6 +206,7 @@ export class AccessManageService {
             await transactionalEntityManager.delete(RoleAccess, { access: In(accessIdList) });
         });
 
-        // TODO: 需要删除内存中的数据
+        // 删除权限缓存
+        await this.redisService.delete(AUTH_ROLE_ACCESS_RELATION_MAP);
     }
 }

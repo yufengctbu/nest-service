@@ -67,8 +67,9 @@ export class UserService {
      * @param code
      */
     public async registerUser(email: string, password: string, code: string): Promise<void> {
+        const emailHandle = userRegisterEmailPrefix(USER_EMAIL_TYPE.REGISTER, email);
         //验证注册时邮箱验证码的正确性
-        const emailCode = await this.redisService.get<string>(userRegisterEmailPrefix(USER_EMAIL_TYPE.REGISTER, email));
+        const emailCode = await this.redisService.get<string>(emailHandle);
 
         if (!emailCode || emailCode !== code) throw new FailException(ERROR_CODE.USER.USER_EMAIL_CODE_ERROR);
 
@@ -89,6 +90,8 @@ export class UserService {
         });
 
         await this.userRepository.save(user);
+        // 删除掉指定的验证缓存
+        await this.redisService.delete(emailHandle);
     }
 
     /**

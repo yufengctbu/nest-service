@@ -3,7 +3,7 @@ import { Body, Controller, Post, Get, Query, Put } from '@nestjs/common';
 import { IPayLoad } from '@app/shared/auth';
 import { UserService } from './user.service';
 import { User } from '@app/decorators/user.decorator';
-import { UsePublicInterface } from '@app/decorators/public.decorator';
+import { UseLoginAccessInterface, UsePublicInterface } from '@app/decorators/public.decorator';
 import { CaptchaInfoDto, GenerateCodeDto, ModifyUserPwdDto, RegisterUserDto, UserLoginDto } from './user.dto';
 
 @Controller('user')
@@ -54,6 +54,7 @@ export class UserController {
     }
 
     // 用户登出
+    @UseLoginAccessInterface()
     @Post('logout')
     public async userLogout(@User() userInfo: IPayLoad) {
         const { id, email } = userInfo;
@@ -62,6 +63,7 @@ export class UserController {
     }
 
     // 获取用户信息
+    @UseLoginAccessInterface()
     @Get('profile')
     public userProfile(@User() userInfo: IPayLoad) {
         const { id } = userInfo;

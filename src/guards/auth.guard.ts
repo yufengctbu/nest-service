@@ -6,13 +6,13 @@ import { ExecutionContext, UnauthorizedException } from '@nestjs/common';
 
 import { AuthService } from '@app/shared/auth';
 import { RedisService } from '@app/shared/redis';
+import { USER_ADMIN } from '@app/routers/user/user.constant';
 import { formatAuthorization } from '@app/helpers/utils.helper';
 import { validateUserRouterAuth } from '@app/helpers/guard.helper';
 import { IUserLoginCache } from '@app/routers/user/user.interface';
 import { userLoginCachePrefix } from '@app/routers/user/user.helper';
-import { IsPublicInterface } from '@app/helpers/reflector-validate.helper';
+import { IsLoginAccessInterface, IsPublicInterface } from '@app/helpers/reflector-validate.helper';
 import { RoleManageService } from '@app/routers/manage/role-manage/role-manage.service';
-import { USER_ADMIN } from '@app/routers/user/user.constant';
 
 export class JwtAuthGuard extends AuthGuard('jwt') {
     private configService: ConfigService;
@@ -48,8 +48,8 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
         const expireTime = this.configService.get<number>('app.loginExpiresIn');
         if (expireTime) await this.redisService.expire(redisHandle, expireTime);
 
-        // 如果是管理员用户，则无需验证权限
-        if (redisStore.admin === USER_ADMIN.ADMIN) return true;
+        // 如果是管理员用户，或者无需验证权限的接口，则直接通过
+        if (redisStore.admin === USER_ADMIN.ADMIN || IsLoginAccessInterface(context.getHandler())) return true;
 
         // 获取所有的角色权限列表
         const roleAccessRelation = await this.roleManageService.queryRoleAccess();

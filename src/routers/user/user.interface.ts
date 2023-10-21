@@ -30,4 +30,6 @@ export interface IUserLoginCache extends Omit<IUserInfo, 'avatar'> {
     roleIds: number[];
 
     token: string;
+
+    admin: number; // 是否是管理员账户
 }

@@ -4,6 +4,12 @@ export enum USER_STATUS {
     NORMAL, // 正常状态
 }
 
+export enum USER_ADMIN {
+    NORMAL, // 普通用户
+
+    ADMIN, // 管理员用户
+}
+
 // 发送邮件的类别
 export enum USER_EMAIL_TYPE {
     REGISTER, // 注册

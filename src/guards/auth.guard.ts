@@ -12,6 +12,7 @@ import { IUserLoginCache } from '@app/routers/user/user.interface';
 import { userLoginCachePrefix } from '@app/routers/user/user.helper';
 import { IsPublicInterface } from '@app/helpers/reflector-validate.helper';
 import { RoleManageService } from '@app/routers/manage/role-manage/role-manage.service';
+import { USER_ADMIN } from '@app/routers/user/user.constant';
 
 export class JwtAuthGuard extends AuthGuard('jwt') {
     private configService: ConfigService;
@@ -46,6 +47,9 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
         // 如果不配置，那么则不设置过期时间
         const expireTime = this.configService.get<number>('app.loginExpiresIn');
         if (expireTime) await this.redisService.expire(redisHandle, expireTime);
+
+        // 如果是管理员用户，则无需验证权限
+        if (redisStore.admin === USER_ADMIN.ADMIN) return true;
 
         // 获取所有的角色权限列表
         const roleAccessRelation = await this.roleManageService.queryRoleAccess();

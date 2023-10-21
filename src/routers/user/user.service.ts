@@ -179,6 +179,7 @@ export class UserService {
                 'user.username AS username',
                 'user.password AS password',
                 'user.status AS status',
+                'user.admin AS admin',
                 'ur.roles AS roles',
             ])
             .leftJoin(`(${subQuery})`, 'ur', 'ur.userId=user.id')
@@ -189,7 +190,7 @@ export class UserService {
         if (!currentUser || !(await bcrypt.compare(password, currentUser.password)))
             throw new FailException(ERROR_CODE.USER.USER_LOGIN_ERROR);
 
-        const { id, username, status, roles } = currentUser;
+        const { id, username, status, roles, admin } = currentUser;
 
         // 如果用户的状态不正常，那么也不允许正常登录
         if (status !== USER_STATUS.NORMAL) throw new FailException(ERROR_CODE.USER.USER_STATUS_FORBIDDEN);
@@ -207,6 +208,7 @@ export class UserService {
                 id,
                 username,
                 email,
+                admin,
                 roleIds: roles ? roles.split(',').map((item: string) => Number(item)) : [],
                 token,
             },

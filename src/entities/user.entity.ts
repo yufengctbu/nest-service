@@ -1,7 +1,7 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 import { TimeEntityBase } from './lib/time-entity-base';
-import { USER_STATUS } from '@app/routers/user/user.constant';
+import { USER_STATUS, USER_ADMIN } from '@app/routers/user/user.constant';
 
 @Entity()
 export class User extends TimeEntityBase {
@@ -22,4 +22,7 @@ export class User extends TimeEntityBase {
 
     @Column('varchar', { nullable: false, length: 200, comment: 'avatar' })
     avatar: string;
+
+    @Column('tinyint', { unsigned: true, nullable: false, default: USER_ADMIN.NORMAL, comment: 'admin' })
+    admin: USER_ADMIN;
 }

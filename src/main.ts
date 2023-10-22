@@ -1,8 +1,10 @@
 import helmet from 'helmet';
+import { join } from 'path';
 import { Logger } from '@nestjs/common';
 import * as compression from 'compression';
 import { NestFactory } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
+import { NestExpressApplication } from '@nestjs/platform-express';
 
 import { AppModule } from '@app/app.module';
 import { JwtAuthGuard } from '@app/guards/auth.guard';
@@ -13,11 +15,15 @@ import { RequestIdMiddleware } from '@app/middlewares/requestId.middleware';
 import { TransformInterceptor } from '@app/interceptors/transform.interceptor';
 
 async function bootstrap() {
-    const app = await NestFactory.create(AppModule, {
+    const app = await NestFactory.create<NestExpressApplication>(AppModule, {
         logger: LogModule.createLogger(),
     });
-
     const config = app.get(ConfigService);
+
+    // 配置资源服务器, 访问地址：http://localhost:3000/assets/资源名称
+    app.useStaticAssets(join(process.cwd(), 'public'), {
+        prefix: '/assets/',
+    });
 
     // 往所有的请求中添加requestId的标识
     app.use(RequestIdMiddleware);

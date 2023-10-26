@@ -59,6 +59,11 @@ export class AccessDto {
     @IsNotEmpty()
     name: string;
 
+    @Length(1, 60)
+    @Transform(({ value }) => value.toString().trim())
+    @IsOptional()
+    routerName: string;
+
     @IsIn(Object.values(ACCESS_TYPE))
     @Type(() => Number)
     @IsNotEmpty()

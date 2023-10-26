@@ -12,6 +12,9 @@ export class Access extends TimeEntityBase {
     @Column('varchar', { length: 60, nullable: false, comment: 'access name' })
     name: string;
 
+    @Column('varchar', { length: 60, nullable: false, default: '', comment: 'router name' })
+    routerName: string;
+
     @ManyToOne(() => AccessCategory, (category) => category.access, { createForeignKeyConstraints: false })
     accessCategory: AccessCategory;
 

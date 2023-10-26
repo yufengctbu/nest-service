@@ -130,7 +130,7 @@ export class AccessManageService {
      * @param accessInfo
      */
     public async createAccess(accessInfo: CreateAccessDto): Promise<void> {
-        const { category, name, type, action, router, desc = '' } = accessInfo;
+        const { category, name, routerName = '', type, action, router, desc = '' } = accessInfo;
 
         const accessCategory = await this.accessCategoryRepository.findOneBy({ id: category });
         if (!accessCategory) throw new FailException(ERROR_CODE.ACCESS.ACCESS_CATEGORY_NOT_EXISTS);
@@ -146,6 +146,7 @@ export class AccessManageService {
         const createAccessInfo = this.accessRepository.create({
             accessCategory: { id: category },
             name,
+            routerName,
             type,
             action,
             routerUrl: router,
@@ -160,7 +161,7 @@ export class AccessManageService {
      * @param accessInfo
      */
     public async modifyAccess(accessInfo: ModifyAccessDto): Promise<void> {
-        const { id, type, action, router, name, desc = '' } = accessInfo;
+        const { id, type, action, router, name, routerName = '', desc = '' } = accessInfo;
 
         const targetAccess = await this.accessRepository.findOneBy({ id });
 
@@ -184,6 +185,7 @@ export class AccessManageService {
         targetAccess.action = action;
         targetAccess.routerUrl = router;
         targetAccess.description = desc;
+        targetAccess.routerName = routerName;
 
         await this.accessRepository.save(targetAccess);
     }

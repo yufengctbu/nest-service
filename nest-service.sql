@@ -65,6 +65,7 @@ CREATE TABLE `access` (
     `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'access id',
     `access_category_id` int(10) UNSIGNED NOT NULL COMMENT 'access category id',
     `name` varchar(60) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT 'access name',
+    `router_name` varchar(60) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT 'router name',
     `type` tinyint(1) UNSIGNED NOT NULL COMMENT 'access type 0 action 1 menu',
     `action` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT 'access action get post put delete ...',
     `router_url` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT 'router url',

@@ -257,7 +257,7 @@ export class UserService {
         if (userProfile.admin === USER_ADMIN.ADMIN) {
             access = await this.dataSource
                 .createQueryBuilder(Access, 'access')
-                .select(['access.name AS name', 'access.routerUrl AS routerUrl'])
+                .select(['access.name AS name', 'access.routerName AS routerName', 'access.routerUrl AS routerUrl'])
                 .where('access.type=:type', { type: ACCESS_TYPE.MENU })
                 .getRawMany();
         } else {
@@ -269,7 +269,7 @@ export class UserService {
 
             access = await this.dataSource
                 .createQueryBuilder(RoleAccess, 'roleAccess')
-                .select(['access.name AS name', 'access.routerUrl AS routerUrl'])
+                .select(['access.name AS name', 'access.routerName AS routerName', 'access.routerUrl AS routerUrl'])
                 .leftJoin(Access, 'access', 'roleAccess.access=access.id')
                 .where(`access.type=:type AND roleAccess.roleId IN (${subQuery})`)
                 .setParameters({ userId, type: ACCESS_TYPE.MENU })

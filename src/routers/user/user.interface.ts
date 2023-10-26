@@ -15,6 +15,8 @@ export interface IUserCaptchaResponse {
 export interface IUserInfoAccess {
     name: string;
 
+    routerName: string;
+
     routerUrl: string;
 }
 

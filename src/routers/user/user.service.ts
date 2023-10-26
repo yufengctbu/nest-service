@@ -3,20 +3,21 @@ import * as bcrypt from 'bcrypt';
 import * as svgCaptcha from 'svg-captcha';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 
 import { UserLoginDto } from './user.dto';
-import { RedisService } from '@app/shared/redis';
-import { User, UserRole } from '@app/entities';
-import { generateCode } from '@app/helpers/utils.helper';
 import { AuthService } from '@app/shared/auth';
+import { RedisService } from '@app/shared/redis';
+import { generateCode } from '@app/helpers/utils.helper';
 import { FailException } from '@app/exceptions/fail.exception';
 import { ERROR_CODE } from '@app/constants/error-code.constant';
+import { Access, RoleAccess, User, UserRole } from '@app/entities';
 import { EMAIL_VALIDITY_PERIOD } from '@app/constants/common.constant';
-import { USER_STATUS, USER_CAPTCHA_EXPIRE, USER_EMAIL_TYPE } from './user.constant';
-import { IUserCaptchaResponse, IUserInfo, IUserLoginResponse } from './user.interface';
+import { ACCESS_TYPE } from '@app/routers/manage/access-manage/access-manage.constant';
+import { USER_STATUS, USER_CAPTCHA_EXPIRE, USER_EMAIL_TYPE, USER_ADMIN } from './user.constant';
 import { userRegisterEmailPrefix, userLoginCachePrefix, userLoginCaptchaPrefix } from './user.helper';
+import { IUserCaptchaResponse, IUserInfo, IUserLoginResponse, IUserInfoAccess } from './user.interface';
 import { createRegisterCodeHtml, createModifyPasswordCodeHtml, EmailerService } from '@app/shared/emailer';
 
 @Injectable()
@@ -244,14 +245,43 @@ export class UserService {
      */
     public async queryUserProfile(userId: number): Promise<Omit<IUserInfo, 'status'>> {
         const userProfile = await this.userRepository.findOne({
-            select: ['id', 'username', 'email', 'avatar'],
+            select: ['id', 'username', 'email', 'avatar', 'admin'],
             where: { id: userId },
         });
 
         if (!userProfile) throw new FailException(ERROR_CODE.USER.USER_PROFILE_ERROR);
 
+        let access: IUserInfoAccess[];
+
+        // 如果是管理员权限
+        if (userProfile.admin === USER_ADMIN.ADMIN) {
+            access = await this.dataSource
+                .createQueryBuilder(Access, 'access')
+                .select(['access.name AS name', 'access.routerUrl AS routerUrl'])
+                .where('access.type=:type', { type: ACCESS_TYPE.MENU })
+                .getRawMany();
+        } else {
+            const subQuery = this.dataSource
+                .createQueryBuilder(UserRole, 'userRole')
+                .select('userRole.role AS id')
+                .where('userRole.userId=:userId')
+                .getQuery();
+
+            access = await this.dataSource
+                .createQueryBuilder(RoleAccess, 'roleAccess')
+                .select(['access.name AS name', 'access.routerUrl AS routerUrl'])
+                .leftJoin(Access, 'access', 'roleAccess.access=access.id')
+                .where(`access.type=:type AND roleAccess.roleId IN (${subQuery})`)
+                .setParameters({ userId, type: ACCESS_TYPE.MENU })
+                .getRawMany();
+        }
+
         return {
-            ...userProfile,
+            id: userProfile.id,
+            username: userProfile.username,
+            email: userProfile.email,
+            avatar: userProfile.avatar,
+            access,
         };
     }
 }

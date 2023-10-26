@@ -12,6 +12,12 @@ export interface IUserCaptchaResponse {
     captcha: string;
 }
 
+export interface IUserInfoAccess {
+    name: string;
+
+    routerUrl: string;
+}
+
 // 用户的基础信息
 export interface IUserInfo {
     id: number;
@@ -23,6 +29,8 @@ export interface IUserInfo {
     avatar: string;
 
     status: USER_STATUS;
+
+    access: Array<IUserInfoAccess>;
 }
 
 // 缓存中用户的信息

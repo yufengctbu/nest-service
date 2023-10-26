@@ -3,5 +3,5 @@ import { IPagination } from '@app/interfaces/pagination.interface';
 
 // 查询用户列表
 export interface IUserListResponse extends IPagination {
-    users: IUserInfo[];
+    users: Omit<IUserInfo, 'access'>[];
 }

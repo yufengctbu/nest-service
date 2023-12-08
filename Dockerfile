@@ -1,7 +1,7 @@
-FROM node:18.17.0
+FROM node:18.17.0-alpine
 
 # 设置变量
-ENV APP_PATH=/extension-manager
+ENV APP_PATH=/nest-service
 
 WORKDIR $APP_PATH
 

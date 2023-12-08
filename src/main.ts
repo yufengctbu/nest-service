@@ -8,7 +8,7 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 
 import { AppModule } from '@app/app.module';
 import { JwtAuthGuard } from '@app/guards/auth.guard';
-import { LogModule, LogFileService } from '@app/shared/log';
+import { LogModule, WINSTON_LOG } from '@app/shared/log';
 import { validationHelper } from '@app/helpers/validate.helper';
 import { ExceptionsFilter } from '@app/filters/exception.filter';
 import { RequestIdMiddleware } from '@app/middlewares/requestId.middleware';
@@ -37,13 +37,13 @@ async function bootstrap() {
     // 注册全局过滤器
     app.useGlobalPipes(validationHelper(config.get('app.paramsError')));
 
-    const logFileService = app.get(LogFileService);
+    const winstonLogService = app.get(WINSTON_LOG);
 
     // 使用全局的错误过滤器
-    app.useGlobalFilters(new ExceptionsFilter(logFileService, config));
+    app.useGlobalFilters(new ExceptionsFilter(winstonLogService, config));
 
     // 使用全局的数据拦截器
-    app.useGlobalInterceptors(new TransformInterceptor(logFileService, config));
+    app.useGlobalInterceptors(new TransformInterceptor(winstonLogService, config));
 
     // 使用全局守卫
     app.useGlobalGuards(new JwtAuthGuard(app));

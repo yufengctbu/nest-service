@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import safeStringify from 'fast-safe-stringify';
 import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from '@nestjs/common';
 
-import { LogFileService } from '@app/shared/log';
+import { IWinstonLogger } from '@app/shared/log';
 import { customResponse } from '@app/helpers/response.helper';
 import { IsOriginResponse } from '@app/helpers/reflector-validate.helper';
 
@@ -12,7 +12,7 @@ export class TransformInterceptor implements NestInterceptor {
     private responseLog: boolean;
 
     public constructor(
-        private readonly logFileService: LogFileService,
+        private readonly winstonLogService: IWinstonLogger,
         private readonly configService: ConfigService,
     ) {
         this.responseLog = this.configService.get('app.logs.responseLog') || false;
@@ -27,7 +27,7 @@ export class TransformInterceptor implements NestInterceptor {
 
                 const result = customResponse(data, requestId);
 
-                if (this.responseLog) this.logFileService.file(safeStringify(result));
+                if (this.responseLog) this.winstonLogService.log(safeStringify(result));
 
                 return result;
             }),

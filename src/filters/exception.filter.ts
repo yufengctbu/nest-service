@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import safeStringify from 'fast-safe-stringify';
 import { ExceptionFilter, Catch, ArgumentsHost, HttpException, HttpStatus, Logger } from '@nestjs/common';
 
-import { LogFileService } from '@app/shared/log';
+import { IWinstonLogger } from '@app/shared/log';
 import { SERVICE_ERROR_TEXT } from '@app/constants/http.constant';
 import { ERROR_CODE } from '@app/constants/error-code.constant';
 import { CustomException } from '@app/exceptions/custom.exception';
@@ -13,7 +13,7 @@ export class ExceptionsFilter implements ExceptionFilter {
     private consoleErrorLog: boolean;
 
     public constructor(
-        private readonly logFileService: LogFileService,
+        private readonly winstonLogService: IWinstonLogger,
         private readonly configService: ConfigService,
     ) {
         this.consoleErrorLog = this.configService.get('app.logs.consoleErrorLog') || false;
@@ -56,7 +56,7 @@ export class ExceptionsFilter implements ExceptionFilter {
             stack: exception.stack || '',
         });
 
-        this.logFileService.file(resLog);
+        this.winstonLogService.log(resLog);
 
         // 如果需要在控制台输出错误的信息
         if (this.consoleErrorLog) Logger.error(res, exception.stack);

@@ -1,12 +1,12 @@
 import safeStringify from 'fast-safe-stringify';
 import { Request, Response, NextFunction } from 'express';
-import { Injectable, NestMiddleware } from '@nestjs/common';
+import { Inject, Injectable, NestMiddleware } from '@nestjs/common';
 
-import { LogFileService } from '@app/shared/log';
+import { IWinstonLogger, WINSTON_LOG } from '@app/shared/log';
 
 @Injectable()
 export class RequestLogMiddleware implements NestMiddleware {
-    public constructor(private readonly logFileService: LogFileService) {}
+    public constructor(@Inject(WINSTON_LOG) private readonly winstonLogService: IWinstonLogger) {}
 
     use(req: Request, res: Response, next: NextFunction) {
         const reqContent = safeStringify({
@@ -22,7 +22,7 @@ export class RequestLogMiddleware implements NestMiddleware {
         });
 
         // 把请求的信息写入日志
-        this.logFileService.file(reqContent);
+        this.winstonLogService.log(reqContent);
         next();
     }
 }

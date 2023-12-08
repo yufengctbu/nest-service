@@ -3,7 +3,7 @@ import { format, Logform } from 'winston';
 import safeStringify from 'fast-safe-stringify';
 
 import * as pkg from '@root/package.json';
-import { FILE_LOG } from './log.constant';
+import { WINSTON_LOG_LEVEL } from './log.constant';
 
 // 权重由低到高，指定高的translate会影响低的，但是指定低的不会影响高的
 export const logLevels = {
@@ -13,8 +13,8 @@ export const logLevels = {
 };
 
 // 写入文件的日志等级
-export const fileLevels = {
-    [FILE_LOG]: 0,
+export const winstonLogLevels = {
+    [WINSTON_LOG_LEVEL]: 0,
 };
 
 const appName = pkg.name || 'Nest';
@@ -61,7 +61,7 @@ export const nestConsoleFormat = (): Logform.Format => {
         message = message ? (formattedMeta === '{}' ? message : `${message} - ${formattedMeta}`) : formattedMeta;
 
         // 如果是写入文件，则不需要作其他的处理
-        if (level === FILE_LOG) return message;
+        if (level === WINSTON_LOG_LEVEL) return message;
 
         if ('undefined' !== typeof timestamp) {
             try {

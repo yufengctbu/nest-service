@@ -15,9 +15,16 @@ export default registerAs('database', () => ({
 
         database: env.MYSQL_DATABASE || '', // 数据库的名称
 
-        // typeorm的log值有分成 boolean | "all" | LogLevel[];
-        // LogLevel = "query" | "schema" | "error" | "warn" | "info" | "log" | "migration";
-        loggerOptions: ['error'],
+        logConfig: {
+            dir: 'logs',
+            filename: 'mysql',
+            maxSize: '20m', // 每个日志文件的最大大小
+            maxFiles: '15d', // 保留的日志文件数
+
+            // typeorm的log值有分成 boolean | "all" | LogLevel[];
+            // LogLevel = "query" | "schema" | "error" | "warn" | "info" | "log" | "migration";
+            loggerOptions: ['error'],
+        },
     },
 
     // redis 数据库

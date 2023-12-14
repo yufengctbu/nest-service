@@ -11,7 +11,8 @@ export const mysqlProvider: Provider = {
 
     useFactory: (configService: ConfigService): Promise<TypeOrmModuleOptions> | TypeOrmModuleOptions => {
         const mysqlOptions = configService.get('database.mysql');
-        const loggerOptions = mysqlOptions.loggerOptions || false;
+        const logConfig = configService.get('database.mysql.logConfig') || {};
+        const loggerOptions = logConfig.loggerOptions || false;
 
         return {
             type: 'mysql',
@@ -32,7 +33,7 @@ export const mysqlProvider: Provider = {
 
             synchronize: false,
 
-            logger: loggerOptions && new MysqlFileLog(configService, loggerOptions),
+            logger: loggerOptions && new MysqlFileLog(logConfig),
         };
     },
 

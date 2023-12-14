@@ -1,17 +1,16 @@
 import { Logger } from 'winston';
 
-import { IWinstonLogger } from '../log.interface';
 import { WINSTON_LOG_LEVEL } from '../log.constant';
-import { ConfigService } from '@nestjs/config';
+import { IFileConfig, IWinstonLogger } from '../log.interface';
 
 export abstract class LogBase implements IWinstonLogger {
     protected instance: Logger;
 
-    public constructor(configService: ConfigService) {
-        this.instance = this.initLogInstance(configService);
+    public constructor(logConfig: IFileConfig) {
+        this.instance = this.initLogInstance(logConfig);
     }
 
-    protected abstract initLogInstance(configService: ConfigService): Logger;
+    protected abstract initLogInstance(logConfig: IFileConfig): Logger;
 
     protected logWithMeta(level: string, message: string, context?: string, meta?: any): void {
         this.instance.log({ level, message, context, ...meta });

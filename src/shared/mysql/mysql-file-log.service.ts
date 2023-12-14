@@ -1,31 +1,44 @@
+import { FileLogger } from 'typeorm';
 import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { Logger, createLogger } from 'winston';
-import { FileLogger, LoggerOptions } from 'typeorm';
 import * as DailyRotateFile from 'winston-daily-rotate-file';
+
+import { IMysqlLogConfig } from './mysql.interface';
 
 @Injectable()
 export class MysqlFileLog extends FileLogger {
     private instance: Logger;
+    private mysqlConfig: Omit<IMysqlLogConfig, 'loggerOptions'>;
 
-    public constructor(
-        private readonly configService: ConfigService,
-        private readonly loggerOptions?: LoggerOptions,
-    ) {
+    public constructor(mysqlConfig: IMysqlLogConfig) {
+        const loggerOptions = mysqlConfig.loggerOptions || false;
         super(loggerOptions);
 
         if (typeof loggerOptions !== 'boolean' || loggerOptions) {
+            this.formatMysqlConfig(mysqlConfig);
             this.instance = this.initFileInstance();
         }
     }
 
+    // 格式化配置
+    private formatMysqlConfig(mysqlConfig: IMysqlLogConfig): void {
+        this.mysqlConfig = Object.assign(
+            {
+                dir: 'logs',
+                filename: 'mysql',
+                maxSize: '20m', // 每个日志文件的最大大小
+                maxFiles: '15d', // 保留的日志文件数
+            },
+            mysqlConfig,
+        );
+    }
+
     private initFileInstance(): Logger {
-        const maxSize = this.configService.get('app.logs.maxSize') || '20m';
-        const maxFiles = this.configService.get('app.logs.maxFiles') || '12d';
+        const { dir, filename, maxFiles, maxSize } = this.mysqlConfig;
 
         const defaultConfig = {
-            auditFile: 'logs/mysql-audit.log',
-            filename: 'logs/mysql.%DATE%.log',
+            auditFile: `${dir}/${filename}-audit.log`,
+            filename: `${dir}/${filename}.%DATE%.log`,
             datePattern: 'YYYY-MM-DD',
             maxSize, // 每个日志文件的最大大小
             maxFiles, // 保留的日志文件数

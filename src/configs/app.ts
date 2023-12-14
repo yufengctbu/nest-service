@@ -23,8 +23,11 @@ export default registerAs('app', () => ({
 
         consoleErrorLog: isDev, // 如果是错误，是否在控制台打印
 
-        maxSize: '20m', // 每个日志文件的最大大小
-
-        maxFiles: '15d', // 保留的日志文件数
+        config: {
+            dir: 'logs',
+            filename: 'http',
+            maxSize: '20m', // 每个日志文件的最大大小
+            maxFiles: '15d', // 保留的日志文件数
+        },
     },
 }));

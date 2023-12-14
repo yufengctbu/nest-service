@@ -6,7 +6,9 @@ import { LogFileService } from './lib/log-file.service';
 export const winstonLogProvider: Provider = {
     provide: WINSTON_LOG,
     useFactory: (configService: ConfigService) => {
-        return new LogFileService(configService);
+        const logConfig = configService.get('app.logs.config') || {};
+
+        return new LogFileService(logConfig);
     },
     inject: [ConfigService],
 };

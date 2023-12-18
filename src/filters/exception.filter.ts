@@ -52,6 +52,7 @@ export class ExceptionsFilter implements ExceptionFilter {
         Object.assign(res, { requestId });
 
         const message = safeStringify({
+            level: 'error',
             ...res,
             stack: exception.stack || '',
         });

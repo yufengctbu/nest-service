@@ -10,6 +10,7 @@ export class RequestLogMiddleware implements NestMiddleware {
 
     use(req: Request, res: Response, next: NextFunction) {
         const message = safeStringify({
+            level: 'info',
             requestId: req.requestId,
             method: req.method,
             ip: req.ip,

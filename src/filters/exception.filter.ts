@@ -49,16 +49,14 @@ export class ExceptionsFilter implements ExceptionFilter {
                 errno: ERROR_CODE.SERVICE.SERVICE_ERROR,
             };
 
-        const content = Object.keys(res)
-            .filter((item) => res[item])
-            .map((item) => `${item}: ${safeStringify(res[item])}`)
-            .join(' ');
+        Object.assign(res, { requestId });
 
-        const message = `requestId: ${requestId} ${content} stack: ${safeStringify(exception.stack || '')}`;
+        const message = safeStringify({
+            ...res,
+            stack: exception.stack || '',
+        });
 
         this.winstonLogService.log(message);
-
-        Object.assign(res, { requestId });
 
         // 如果需要在控制台输出错误的信息
         if (this.consoleErrorLog) Logger.error(res, exception.stack);

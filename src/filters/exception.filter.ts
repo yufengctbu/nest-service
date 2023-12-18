@@ -50,10 +50,11 @@ export class ExceptionsFilter implements ExceptionFilter {
             };
 
         const content = Object.keys(res)
+            .filter((item) => res[item])
             .map((item) => `${item}: ${safeStringify(res[item])}`)
             .join(' ');
 
-        const message = `requestId: ${requestId} ${content} stack: ${exception.stack || ''}`;
+        const message = `requestId: ${requestId} ${content} stack: ${safeStringify(exception.stack || '')}`;
 
         this.winstonLogService.log(message);
 

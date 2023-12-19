@@ -9,18 +9,11 @@ export class RequestLogMiddleware implements NestMiddleware {
     public constructor(@Inject(WINSTON_LOG) private readonly winstonLogService: IWinstonLogger) {}
 
     use(req: Request, res: Response, next: NextFunction) {
-        const message = safeStringify({
-            level: 'info',
-            requestId: req.requestId,
-            method: req.method,
-            ip: req.ip,
-            url: req.url,
-            headers: req.headers,
-            body: req.body,
-            params: req.params,
-            query: req.query,
-            time: new Date().toLocaleString(),
-        });
+        const message = `requestId: ${req.requestId} level: 'info' ip: ${req.ip} url: ${req.url} method: ${
+            req.method
+        } headers: ${safeStringify(req.headers)} body: ${safeStringify(req.body)} params: ${safeStringify(
+            req.params,
+        )} query: ${safeStringify(req.query)} time: ${new Date().toLocaleString()}`;
 
         // 把请求的信息写入日志
         this.winstonLogService.log(message);

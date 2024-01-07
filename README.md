@@ -50,6 +50,12 @@ EMAIL_AUTH_CODE=***
 
 > 更多配置祥见configs目录中的配置
 
+## 项目初始化
+
+1. 初始化数据库, 需要把`sql`目录下的`nest-service@1.0.0.sql`文件导入到创建好的数据库中
+
+2. 初始化数据库的表后,再初化最初的权限, 在数据库的命令行中执行`nest-service.init.sql`
+
 ## 运行
 
 ```bash
